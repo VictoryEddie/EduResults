@@ -2,7 +2,7 @@
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, easeOut } from "framer-motion";
 import { SkeletonDashboard } from "@/components/Skeleton";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import ErrorMessage from "@/components/ErrorMessage";
@@ -34,7 +34,7 @@ const cardVariants = {
   show: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.08, duration: 0.4, ease: "easeOut" },
+    transition: { delay: i * 0.08, duration: 0.4, ease: easeOut },
   }),
 };
 

@@ -9,7 +9,8 @@ interface AnimatedButtonProps extends React.ButtonHTMLAttributes<HTMLButtonEleme
 
 const variants = {
   primary: "bg-[#1B2B4B] text-white hover:bg-[#F59E0B] hover:text-[#1B2B4B]",
-  secondary: "border border-[#1B2B4B] text-[#1B2B4B] hover:bg-[#1B2B4B] hover:text-white",
+  secondary:
+    "border border-[#1B2B4B] text-[#1B2B4B] hover:bg-[#1B2B4B] hover:text-white",
   danger: "bg-red-500 text-white hover:bg-red-600",
   ghost: "text-[#1B2B4B] hover:bg-gray-100",
 };
@@ -35,12 +36,14 @@ export default function AnimatedButton({
         <span className="flex items-center gap-2">
           <motion.span
             animate={{ rotate: 360 }}
-            transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
+            transition={{ duration: 0.8, repeat: Infinity, ease: linear }}
             className="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full"
           />
           Please wait...
         </span>
-      ) : children}
+      ) : (
+        children
+      )}
     </motion.button>
   );
 }

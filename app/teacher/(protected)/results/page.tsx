@@ -8,7 +8,7 @@ import { useToast } from "@/components/Toast";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { SkeletonTable } from "@/components/Skeleton";
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, easeOut } from "framer-motion";
 import {
   collection,
   getDocs,
@@ -581,7 +581,7 @@ export default function ResultsPage() {
                       animate={{
                         width: `${(completedCount / students.length) * 100}%`,
                       }}
-                      transition={{ duration: 0.5, ease: "easeOut" }}
+                      transition={{ duration: 0.5, ease: easeOut }}
                     />
                   </div>
                 </div>

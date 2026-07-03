@@ -1,6 +1,6 @@
 "use client";
 import { createContext, useContext, useState, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, easeOut } from "framer-motion";
 
 type ToastType = "success" | "error" | "warning";
 
@@ -19,12 +19,19 @@ const ToastContext = createContext<ToastContextType>({ showToast: () => {} });
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
-  const showToast = useCallback((message: string, type: ToastType = "success") => {
-    const id = Math.random().toString(36).slice(2);
-    setToasts((prev) => [...prev, { id, message, type }]);
-    const duration = type === "error" ? 5000 : type === "warning" ? 4000 : 3000;
-    setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), duration);
-  }, []);
+  const showToast = useCallback(
+    (message: string, type: ToastType = "success") => {
+      const id = Math.random().toString(36).slice(2);
+      setToasts((prev) => [...prev, { id, message, type }]);
+      const duration =
+        type === "error" ? 5000 : type === "warning" ? 4000 : 3000;
+      setTimeout(
+        () => setToasts((prev) => prev.filter((t) => t.id !== id)),
+        duration,
+      );
+    },
+    [],
+  );
 
   const colors = {
     success: "bg-green-50 border-green-200 text-green-800",
@@ -45,15 +52,19 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
               initial={{ opacity: 0, x: 60, scale: 0.95 }}
               animate={{ opacity: 1, x: 0, scale: 1 }}
               exit={{ opacity: 0, x: 60, scale: 0.95 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
+              transition={{ duration: 0.2, ease: easeOut }}
               className={`flex items-start gap-3 border rounded-xl px-4 py-3 shadow-sm text-sm ${colors[toast.type]}`}
             >
               <span className="font-bold mt-0.5">{icons[toast.type]}</span>
               <span>{toast.message}</span>
               <button
-                onClick={() => setToasts((prev) => prev.filter((t) => t.id !== toast.id))}
+                onClick={() =>
+                  setToasts((prev) => prev.filter((t) => t.id !== toast.id))
+                }
                 className="ml-auto opacity-50 hover:opacity-100 transition-opacity"
-              >×</button>
+              >
+                ×
+              </button>
             </motion.div>
           ))}
         </AnimatePresence>

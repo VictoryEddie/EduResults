@@ -37,7 +37,7 @@ export default function Home() {
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
+            transition={{ duration: 0.5, ease: easeOut }}
             className="inline-flex items-center gap-2 mb-4 px-4 py-1.5 rounded-full bg-blue-100 text-blue-800 text-sm font-semibold tracking-wide shadow-sm dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200 dark:border-blue-800/50"
           >
             {settings.logo && (
