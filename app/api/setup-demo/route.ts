@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminDb, adminAuth } from "@/lib/firebaseAdmin";
+import { QueryDocumentSnapshot } from "firebase-admin/firestore";
 import bcrypt from "bcryptjs";
 
 // Demo password for all demo accounts
@@ -346,7 +347,7 @@ export async function POST(req: NextRequest) {
               createdAt: new Date().toISOString(),
             });
             const newStudentSnap =
-              (await newStudentRef.get()) as admin.firestore.QueryDocumentSnapshot;
+              (await newStudentRef.get()) as QueryDocumentSnapshot;
             studentDocs.push(newStudentSnap);
           }
           console.log(

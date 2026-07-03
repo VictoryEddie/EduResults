@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
 
     // Test if we can create a session cookie (simulate what login does)
     const testUserId = listUsersResult.users[0]?.uid;
-    let sessionCookieTest = { success: false, error: null };
+    let sessionCookieTest: { success: boolean; error: string | null; code?: string } = { success: false, error: null };
 
     if (testUserId) {
       try {
