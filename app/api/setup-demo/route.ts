@@ -334,7 +334,7 @@ export async function POST(req: NextRequest) {
             const studentEmail = `${studentName.firstName.toLowerCase()}.${studentName.lastName.toLowerCase()}${i}@student.demo`;
             const admissionNumber = `STD${String(Date.now()).slice(-4)}${String(i + 100).slice(-2)}`;
 
-            const newStudentDoc = await studentsRef.add({
+            const newStudentRef = await studentsRef.add({
               firstName: studentName.firstName,
               lastName: studentName.lastName,
               name: `${studentName.firstName} ${studentName.lastName}`,
@@ -345,7 +345,8 @@ export async function POST(req: NextRequest) {
               parentEmail: "",
               createdAt: new Date().toISOString(),
             });
-            studentDocs.push(newStudentDoc);
+            const newStudentSnap = await newStudentRef.get();
+            studentDocs.push(newStudentSnap);
           }
           console.log(
             `Created ${numStudentsToCreate} students for teacher ${teacher.email}`,
