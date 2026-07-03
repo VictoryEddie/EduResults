@@ -49,7 +49,6 @@ interface AuditEntry {
   // Orphan assign
   studentName?: string;
   newTeacherName?: string;
-  newClassName?: string;
 }
 
 const actionConfig: Record<
