@@ -345,7 +345,8 @@ export async function POST(req: NextRequest) {
               parentEmail: "",
               createdAt: new Date().toISOString(),
             });
-            const newStudentSnap = await newStudentRef.get();
+            const newStudentSnap =
+              (await newStudentRef.get()) as admin.firestore.QueryDocumentSnapshot;
             studentDocs.push(newStudentSnap);
           }
           console.log(
