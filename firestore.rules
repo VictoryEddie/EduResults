@@ -1,0 +1,89 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // --- HELPERS ---
+    
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // --- RULES ---
+
+    // Access keys — only allow individual lookups, prevent listing the whole collection
+    match /accessKeys/{key} {
+      allow get: if true;
+      allow list: if false;
+      allow write: if false;
+    }
+
+    // Parents — profile management
+    match /parents/{parentId} {
+      allow get: if isSignedIn();
+      allow list: if false;
+      allow create, update: if isSignedIn() && request.auth.uid == parentId;
+      allow delete: if false;
+    }
+
+    // Teachers — profile and student management
+    match /teachers/{teacherId} {
+      allow get: if isSignedIn();
+      allow list: if false; 
+      allow create, update: if isSignedIn() && request.auth.uid == teacherId;
+      allow delete: if false;
+
+      // Deny all client-side access to private config (only managed via Admin SDK)
+      match /private/{document=**} {
+        allow read, write: if false;
+      }
+
+      // Student list under a teacher
+      match /students/{studentId} {
+        allow read, write: if isSignedIn() && request.auth.uid == teacherId;
+        
+        // Allow parents to read their linked student's basic info
+        allow read: if isSignedIn() && 
+          exists(/databases/$(database)/documents/parents/$(request.auth.uid)) &&
+          resource.data.get('parentEmail', '') == get(/databases/$(database)/documents/parents/$(request.auth.uid)).data.email;
+      }
+
+      // Subject management for results
+      match /subjects/{term} {
+        allow read, write: if isSignedIn() && request.auth.uid == teacherId;
+      }
+    }
+
+    // Results — the core of the portal
+    match /results/{studentId}/terms/{term} {
+      // Write: Only the teacher who owns the student can write results
+      allow write: if isSignedIn() && 
+        exists(/databases/$(database)/documents/teachers/$(request.auth.uid)/students/$(studentId));
+
+      // Read: 
+      allow read: if isSignedIn() && (
+        // Teacher check: Teacher who owns the student
+        exists(/databases/$(database)/documents/teachers/$(request.auth.uid)/students/$(studentId)) ||
+        // Parent check: Parent linked to the student
+        (
+          exists(/databases/$(database)/documents/parents/$(request.auth.uid)) &&
+          (
+            // Primary: Check if parent email is stored directly in result
+            (resource.data.get('parentEmail', '') == get(/databases/$(database)/documents/parents/$(request.auth.uid)).data.email) ||
+            // Fallback: Look up via teacher's student document
+            (
+              resource.data.get('teacherId', '') != '' && 
+              exists(/databases/$(database)/documents/teachers/$(resource.data.teacherId)/students/$(studentId)) &&
+              get(/databases/$(database)/documents/teachers/$(resource.data.teacherId)/students/$(studentId)).data.parentEmail == get(/databases/$(database)/documents/parents/$(request.auth.uid)).data.email
+            )
+          )
+        )
+      );
+    }
+
+    // Deny all other collections by default (admins, auditLog, orphaned collections)
+    // These are managed exclusively via the Admin SDK in server-side API routes
+    match /{path=**} {
+      allow read, write: if false;
+    }
+  }
+}

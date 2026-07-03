@@ -1,0 +1,107 @@
+import { NextRequest, NextResponse } from "next/server";
+
+/* Route groups — used to determine which session type is required */
+const teacherProtected = ["/teacher/dashboard", "/teacher/students", "/teacher/results", "/teacher/preview", "/teacher/print"];
+const parentProtected = ["/parent/dashboard", "/parent/results"];
+const adminProtected = ["/admin/dashboard", "/admin/teachers", "/admin/parents", "/admin/orphaned", "/admin/audit"];
+const teacherAuth = ["/teacher/login", "/teacher/register"];
+const parentAuth = ["/parent/login", "/parent/register"];
+const adminAuthPages = ["/admin/login"];
+
+/**
+ * Verifies a Firebase session cookie.
+ * Note: Since Next.js middleware runs on the Edge Runtime, full 'firebase-admin' verification 
+ * will only work if the project is configured for Node runtime middleware. 
+ * Otherwise, we use presence-based protection here and verify properly in the API/Server Components.
+ */
+async function isAuthenticated(cookieName: string, req: NextRequest): Promise<boolean> {
+  const cookie = req.cookies.get(cookieName)?.value;
+  if (!cookie) return false;
+  
+  // For edge-compatible verification, one would use the 'jose' library to verify the JWT.
+  // For now, we trust the secure, httpOnly session cookie set by our login API.
+  return true;
+}
+
+/**
+ * Main Middleware Function
+ */
+export async function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
+
+  // Skip static assets and internal next paths
+  if (
+    pathname.startsWith("/_next") || 
+    pathname.startsWith("/static") || 
+    pathname.includes(".")
+  ) {
+    return NextResponse.next();
+  }
+
+  const isTeacher = await isAuthenticated("teacher-token", req);
+  const isParent = await isAuthenticated("parent-token", req);
+  const isAdmin = await isAuthenticated("admin-token", req);
+
+  /* Portal Root Redirects — Prevent 404s on directory roots */
+  if (pathname === "/admin") return NextResponse.redirect(new URL("/admin/dashboard", req.url));
+  if (pathname === "/teacher") return NextResponse.redirect(new URL("/teacher/dashboard", req.url));
+  if (pathname === "/parent") return NextResponse.redirect(new URL("/parent/dashboard", req.url));
+
+
+  /* Admin route protection — redirect to login if not authenticated */
+  if (adminProtected.some((p) => pathname.startsWith(p))) {
+    if (!isAdmin) return NextResponse.redirect(new URL("/admin/login", req.url));
+  }
+  if (adminAuthPages.some((p) => pathname.startsWith(p))) {
+    if (isAdmin) return NextResponse.redirect(new URL("/admin/dashboard", req.url));
+  }
+
+  /* Teacher route protection */
+  if (teacherProtected.some((p) => pathname.startsWith(p))) {
+    if (!isTeacher) return NextResponse.redirect(new URL("/teacher/login", req.url));
+  }
+  if (teacherAuth.some((p) => pathname.startsWith(p))) {
+    if (isTeacher) return NextResponse.redirect(new URL("/teacher/dashboard", req.url));
+  }
+
+  /* Parent route protection */
+  if (parentProtected.some((p) => pathname.startsWith(p))) {
+    if (!isParent) return NextResponse.redirect(new URL("/parent/login", req.url));
+  }
+  if (parentAuth.some((p) => pathname.startsWith(p))) {
+    if (isParent) return NextResponse.redirect(new URL("/parent/dashboard", req.url));
+  }
+
+  /* Cross-role access prevention — each role can only access their own pages */
+  if (pathname.startsWith("/teacher/") && isParent && !isTeacher) {
+    return NextResponse.redirect(new URL("/parent/dashboard", req.url));
+  }
+  if (pathname.startsWith("/parent/") && isTeacher && !isParent) {
+    return NextResponse.redirect(new URL("/teacher/dashboard", req.url));
+  }
+
+  /* Prevent browser from caching protected pages — stops back-button access after logout */
+  const response = NextResponse.next();
+  if (
+    adminProtected.some(p => pathname.startsWith(p)) ||
+    teacherProtected.some(p => pathname.startsWith(p)) ||
+    parentProtected.some(p => pathname.startsWith(p))
+  ) {
+    response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    response.headers.set("Pragma", "no-cache");
+    response.headers.set("Expires", "0");
+  }
+
+  return response;
+}
+
+export const config = {
+  matcher: [
+    "/teacher/:path*", 
+    "/parent/:path*", 
+    "/admin/:path*",
+    "/teacher",
+    "/parent",
+    "/admin",
+  ],
+};

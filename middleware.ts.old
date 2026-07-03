@@ -1,0 +1,44 @@
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+
+/* Rate limiting in Next.js middleware is better done with external stores like Redis,
+   but we can implement basic session checks and path protection here. */
+
+export function middleware(req: NextRequest) {
+  const adminToken = req.cookies.get("admin-token")?.value;
+  const teacherToken = req.cookies.get("teacher-token")?.value;
+  const parentToken = req.cookies.get("parent-token")?.value;
+
+  const { pathname } = req.nextUrl;
+
+  /* Protect Admin Dashboard */
+  if (pathname.startsWith("/admin") && !pathname.startsWith("/admin/login")) {
+    if (!adminToken) {
+      return NextResponse.redirect(new URL("/admin/login", req.url));
+    }
+  }
+
+  /* Protect Teacher Dashboard */
+  if (pathname.startsWith("/teacher") && !pathname.startsWith("/teacher/login") && !pathname.startsWith("/teacher/register") && !pathname.startsWith("/teacher/forgot-password")) {
+    if (!teacherToken) {
+      return NextResponse.redirect(new URL("/teacher/login", req.url));
+    }
+  }
+
+  /* Protect Parent Dashboard */
+  if (pathname.startsWith("/parent") && !pathname.startsWith("/parent/login")) {
+    if (!parentToken) {
+      return NextResponse.redirect(new URL("/parent/login", req.url));
+    }
+  }
+
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: [
+    "/admin/:path*",
+    "/teacher/:path*",
+    "/parent/:path*",
+  ],
+};
