@@ -1,5 +1,5 @@
 "use client";
-import { motion, linear } from "framer-motion";
+import { motion } from "framer-motion";
 
 interface AnimatedButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "danger" | "ghost";
@@ -39,7 +39,7 @@ export default function AnimatedButton({
             transition={{
               duration: 0.8,
               repeat: Infinity,
-              ease: [0, 0, 1, 1] as any,
+              ease: "linear",
             }}
             className="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full"
           />

@@ -1,5 +1,5 @@
 "use client";
-import { m, AnimatePresence, LazyMotion, domAnimation } from "framer-motion";
+import { m, AnimatePresence, LazyMotion, domAnimation, easeOut } from "framer-motion";
 import { useEffect, useRef } from "react";
 
 interface ModalProps {
