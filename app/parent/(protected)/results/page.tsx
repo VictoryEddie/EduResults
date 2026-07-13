@@ -144,7 +144,7 @@ function ResultsContent() {
       doc(db, "results", studentId, "terms", termKey),
     );
     if (!resultDoc || !resultDoc.exists()) return null;
-    const data = resultDoc.data();
+    const data = resultDoc.data() as any;
 
     if (data.published === false) return null;
 
@@ -157,7 +157,7 @@ function ResultsContent() {
         doc(db, "teachers", data.teacherId),
       );
       if (teacherDoc && teacherDoc.exists())
-        teacherName = teacherDoc.data().name;
+        teacherName = (teacherDoc.data() as any).name;
 
       // Use pre-calculated position if available
       if (data.position) {

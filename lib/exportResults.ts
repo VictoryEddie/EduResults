@@ -93,7 +93,7 @@ export async function exportResult(data: ExportData, format: ExportFormat) {
       alternateRowStyles: { fillColor: [248, 249, 250] },
     });
 
-    const finalY = (doc as jsPDF & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 10;
+    const finalY = (doc as any).lastAutoTable.finalY + 10;
     doc.setFontSize(10);
     doc.setTextColor(100);
     doc.text("Teacher's Remark:", 14, finalY);

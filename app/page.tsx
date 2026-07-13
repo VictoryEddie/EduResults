@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, easeOut } from "framer-motion";
 import Link from "next/link";
 import { UserCog, BookOpen, Users } from "lucide-react";
 import { useSchoolSettings } from "@/hooks/useSchoolSettings";

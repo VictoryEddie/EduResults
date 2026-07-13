@@ -8,7 +8,7 @@ import { useToast } from "@/components/Toast";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { SkeletonTable } from "@/components/Skeleton";
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence, easeOut } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   collection,
   getDocs,

@@ -2,21 +2,13 @@
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, easeOut } from "framer-motion";
 import { SkeletonTable } from "@/components/Skeleton";
 import { useAuth } from "@/context/AuthContext";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import Breadcrumbs from "@/components/Breadcrumbs";
-import Modal from "@/components/Modal";
-import AnimatedButton from "@/components/AnimatedButton";
 import ErrorMessage from "@/components/ErrorMessage";
-import {
-  User,
-  GraduationCap,
-  ArrowRight,
-  ShieldAlert,
-  BookOpen,
-} from "lucide-react";
+import { GraduationCap, ArrowRight, ShieldAlert } from "lucide-react";
 
 interface Child {
   id: string;
@@ -30,7 +22,7 @@ const cardVariants = {
   show: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.08, duration: 0.4, ease: easeOut },
+    transition: { delay: i * 0.08, duration: 0.4, ease: [0.23, 1, 0.32, 1] },
   }),
 };
 
