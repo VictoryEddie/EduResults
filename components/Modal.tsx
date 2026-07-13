@@ -73,7 +73,7 @@ export default function Modal({ open, onClose, title, children }: ModalProps) {
             />
             <m.div
               ref={modalRef}
-              className="relative bg-white rounded-2xl shadow-xl w-full max-w-md p-6 z-10"
+              className="relative bg-white rounded-2xl shadow-xl w-full max-w-md p-4 sm:p-6 z-10"
               initial={{ scale: 0.95, opacity: 0, y: 10 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0, y: 10 }}

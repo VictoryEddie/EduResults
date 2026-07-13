@@ -184,7 +184,7 @@ export default function AdminDashboard() {
             <div className="p-2 bg-blue-600 rounded-xl">
               <ShieldCheck className="w-6 h-6 text-white" />
             </div>
-            <h2 className="text-4xl font-extrabold text-slate-900 tracking-tight">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
               {schoolName}
             </h2>
           </div>
@@ -202,7 +202,7 @@ export default function AdminDashboard() {
               variants={cardVariants}
               initial="hidden"
               animate="show"
-              className="bg-white/70 backdrop-blur-md rounded-[24px] p-5 border border-white shadow-xl shadow-slate-200/40 hover:shadow-2xl hover:shadow-blue-500/5 transition-all group"
+              className="bg-white/70 backdrop-blur-md rounded-[20px] sm:rounded-[24px] p-4 sm:p-5 border border-white shadow-xl shadow-slate-200/40 hover:shadow-2xl hover:shadow-blue-500/5 transition-all group"
             >
               <div
                 className={`w-10 h-10 rounded-xl ${card.bg} ${card.color} flex items-center justify-center mb-4`}
@@ -212,7 +212,7 @@ export default function AdminDashboard() {
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                 {card.label}
               </p>
-              <p className={`text-2xl font-black mt-1 ${card.color}`}>
+              <p className={`text-xl sm:text-2xl font-black mt-1 ${card.color}`}>
                 {card.value}
               </p>
             </motion.div>

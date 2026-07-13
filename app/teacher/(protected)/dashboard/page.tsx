@@ -348,7 +348,7 @@ export default function TeacherDashboard() {
             className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6"
           >
             <div>
-              <h2 className="text-4xl font-extrabold text-slate-900 tracking-tight capitalize">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight capitalize">
                 Welcome,{" "}
                 <span className="text-blue-600">
                   {user?.name?.split(" ")[0]}
@@ -424,7 +424,7 @@ export default function TeacherDashboard() {
           ) : (
             <>
               {/* Stats Grid */}
-              <div className="grid grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-12">
                 {statCards.map((card, i) => (
                   <motion.div
                     key={card.label}
@@ -432,7 +432,7 @@ export default function TeacherDashboard() {
                     variants={cardVariants}
                     initial="hidden"
                     animate="show"
-                    className="bg-white/70 backdrop-blur-md rounded-[28px] p-6 border border-white shadow-xl shadow-slate-200/40 hover:shadow-2xl hover:shadow-blue-500/5 transition-all group"
+                    className="bg-white/70 backdrop-blur-md rounded-[24px] sm:rounded-[28px] p-4 sm:p-6 border border-white shadow-xl shadow-slate-200/40 hover:shadow-2xl hover:shadow-blue-500/5 transition-all group"
                   >
                     <div className="flex items-start justify-between mb-4">
                       <div
@@ -445,7 +445,7 @@ export default function TeacherDashboard() {
                       {card.label}
                     </p>
                     <p
-                      className={`text-4xl font-black mt-1 tracking-tight ${card.color}`}
+                      className={`text-2xl sm:text-3xl md:text-4xl font-black mt-1 tracking-tight ${card.color}`}
                     >
                       {card.value}
                     </p>

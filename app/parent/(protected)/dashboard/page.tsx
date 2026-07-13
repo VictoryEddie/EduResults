@@ -91,7 +91,7 @@ export default function ParentDashboard() {
           className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6"
         >
           <div>
-            <h2 className="text-4xl font-extrabold text-slate-900 tracking-tight">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
               Welcome,{" "}
               <span className="text-blue-600 capitalize">
                 {user?.name?.split(" ")[0]}

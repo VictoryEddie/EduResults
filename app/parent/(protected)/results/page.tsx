@@ -240,7 +240,7 @@ function ResultsContent() {
 
         <Navbar role="parent" />
 
-        <main className="max-w-4xl mx-auto px-6 py-12 relative z-10">
+        <main className="max-w-4xl mx-auto px-4 sm:px-6 py-10 sm:py-12 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -351,7 +351,7 @@ function ResultsContent() {
                       </p>
                       <div className="flex items-baseline gap-3">
                         <span
-                          className={`text-7xl font-black ${overall.color}`}
+                          className={`text-5xl sm:text-7xl font-black ${overall.color}`}
                         >
                           {overall.grade}
                         </span>
