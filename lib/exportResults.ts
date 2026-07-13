@@ -6,7 +6,7 @@ interface ScoreRow {
   grade: string;
 }
 
-interface ExportData {
+export interface ExportData {
   studentName: string;
   className: string;
   term: string;
