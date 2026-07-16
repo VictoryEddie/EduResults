@@ -150,7 +150,8 @@ function PrintContent() {
   return (
     <div className="min-h-screen bg-slate-50 relative overflow-hidden">
       {/* Ambient background decoration */}
-      <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-blue-100/30 rounded-full blur-[120px] -z-10" />
+      <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-amber-100/30 rounded-full blur-[120px] -z-10" />
+      <div className="absolute bottom-0 left-0 w-[40%] h-[40%] bg-purple-100/30 rounded-full blur-[120px] -z-10" />
       
       <Navbar role="teacher" />
       
@@ -159,7 +160,7 @@ function PrintContent() {
         
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10 no-print">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-indigo-600 rounded-2xl shadow-lg shadow-indigo-100">
+            <div className="p-3 bg-blue-600 rounded-2xl shadow-lg shadow-blue-100">
               <FileText className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -169,7 +170,7 @@ function PrintContent() {
           </div>
           <button 
             onClick={() => handlePrint()}
-            className="flex items-center gap-2 bg-slate-900 text-white px-8 py-4 rounded-2xl font-black hover:bg-blue-600 transition-all shadow-xl shadow-slate-200"
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-2xl font-black transition-all shadow-xl shadow-blue-200"
           >
             <Printer className="w-5 h-5" /> Print / Save PDF
           </button>

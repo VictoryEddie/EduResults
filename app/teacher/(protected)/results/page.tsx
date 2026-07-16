@@ -368,7 +368,8 @@ export default function ResultsPage() {
     <PageTransition>
       <div className="min-h-screen bg-slate-50 relative overflow-hidden">
         {/* Ambient background decoration */}
-        <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-blue-100/30 rounded-full blur-[120px] -z-10" />
+        <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-amber-100/30 rounded-full blur-[120px] -z-10" />
+        <div className="absolute bottom-0 left-0 w-[40%] h-[40%] bg-purple-100/30 rounded-full blur-[120px] -z-10" />
 
         <Navbar role="teacher" />
 
@@ -380,7 +381,7 @@ export default function ResultsPage() {
             animate={{ opacity: 1, y: 0 }}
             className="mb-10 flex items-center gap-4"
           >
-            <div className="p-3 bg-amber-500 rounded-2xl shadow-lg shadow-amber-100">
+            <div className="p-3 bg-blue-600 rounded-2xl shadow-lg shadow-blue-100">
               <ClipboardCheck className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -504,7 +505,7 @@ export default function ResultsPage() {
                 />
                 <button
                   onClick={handleAddSubject}
-                  className="bg-slate-900 text-white px-6 py-3 rounded-xl text-sm font-bold hover:bg-blue-600 transition-all flex items-center gap-2"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-2xl text-sm font-bold transition-all flex items-center gap-2 shadow-lg shadow-blue-100"
                 >
                   <Plus className="w-4 h-4" /> Add
                 </button>
@@ -730,7 +731,7 @@ export default function ResultsPage() {
                       <button
                         onClick={handleSave}
                         disabled={saving}
-                        className="bg-slate-900 text-white px-10 py-4 rounded-2xl font-bold hover:bg-blue-600 transition-all flex items-center gap-3 shadow-lg shadow-slate-200 disabled:opacity-50"
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-10 py-4 rounded-2xl font-bold transition-all flex items-center gap-3 shadow-xl shadow-blue-200 disabled:opacity-50"
                       >
                         {saving ? (
                           <Plus className="w-5 h-5 animate-spin" />
@@ -776,7 +777,7 @@ export default function ResultsPage() {
 
           {/* Empty States */}
           {!termKey && (
-            <div className="bg-white/40 backdrop-blur-sm rounded-[32px] border border-white p-20 text-center">
+            <div className="bg-white/40 backdrop-blur-sm rounded-[32px] border border-white p-12 sm:p-20 text-center shadow-xl shadow-slate-200/40">
               <div className="w-20 h-20 bg-blue-50 rounded-3xl flex items-center justify-center mx-auto mb-6">
                 <Calendar className="w-10 h-10 text-blue-400" />
               </div>

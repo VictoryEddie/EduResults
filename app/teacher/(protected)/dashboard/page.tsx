@@ -33,6 +33,7 @@ import {
   RefreshCw,
   Calendar,
   BookOpen,
+  GraduationCap,
 } from "lucide-react";
 import { ACADEMIC_YEARS } from "@/lib/academicYears";
 
@@ -261,32 +262,32 @@ export default function TeacherDashboard() {
       icon: UserPlus,
       label: "Manage Students",
       desc: "Add or remove students",
-      color: "text-blue-600",
-      bg: "bg-blue-50",
+      color: "text-slate-600",
+      bg: "bg-slate-100",
     },
     {
       href: "/teacher/results",
       icon: PenSquare,
       label: "Enter Results",
       desc: "Score entry and term selection",
-      color: "text-amber-600",
-      bg: "bg-amber-50",
+      color: "text-slate-600",
+      bg: "bg-slate-100",
     },
     {
       href: "/teacher/preview",
       icon: Eye,
       label: "Preview & Export",
       desc: "Review, edit and export results",
-      color: "text-emerald-600",
-      bg: "bg-emerald-50",
+      color: "text-slate-600",
+      bg: "bg-slate-100",
     },
     {
       href: "/teacher/print",
       icon: Printer,
       label: "Print Results",
       desc: "Generate individual result sheets",
-      color: "text-indigo-600",
-      bg: "bg-indigo-50",
+      color: "text-slate-600",
+      bg: "bg-slate-100",
     },
   ];
 
@@ -294,8 +295,8 @@ export default function TeacherDashboard() {
     <PageTransition>
       <div className="min-h-screen bg-slate-50 relative overflow-hidden">
         {/* Ambient background decoration */}
-        <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-blue-100/30 rounded-full blur-[120px] -z-10" />
-        <div className="absolute bottom-0 left-0 w-[40%] h-[40%] bg-amber-100/20 rounded-full blur-[120px] -z-10" />
+        <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-amber-100/30 rounded-full blur-[120px] -z-10" />
+        <div className="absolute bottom-0 left-0 w-[40%] h-[40%] bg-purple-100/30 rounded-full blur-[120px] -z-10" />
 
         <Navbar role="teacher" />
 
@@ -348,13 +349,18 @@ export default function TeacherDashboard() {
             className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6"
           >
             <div>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight capitalize">
-                Welcome,{" "}
-                <span className="text-blue-600">
-                  {user?.name?.split(" ")[0]}
-                </span>
-              </h2>
-              <div className="flex items-center gap-3 mt-2">
+              <div className="flex items-center gap-4 mb-2">
+                <div className="p-3 bg-blue-600 rounded-2xl">
+                  <GraduationCap className="w-6 h-6 text-white" />
+                </div>
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight capitalize">
+                  Welcome,{" "}
+                  <span className="text-blue-600">
+                    {user?.name?.split(" ")[0]}
+                  </span>
+                </h2>
+              </div>
+              <div className="flex items-center gap-3 mt-2 ml-12">
                 {editingClass ? (
                   <div className="flex items-center gap-2 bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
                     <input
@@ -432,20 +438,18 @@ export default function TeacherDashboard() {
                     variants={cardVariants}
                     initial="hidden"
                     animate="show"
-                    className="bg-white/70 backdrop-blur-md rounded-[24px] sm:rounded-[28px] p-4 sm:p-6 border border-white shadow-xl shadow-slate-200/40 hover:shadow-2xl hover:shadow-blue-500/5 transition-all group"
+                    className="bg-white/70 backdrop-blur-md rounded-[20px] sm:rounded-[24px] p-4 sm:p-5 border border-white shadow-xl shadow-slate-200/40 hover:shadow-2xl hover:shadow-blue-500/5 transition-all group"
                   >
-                    <div className="flex items-start justify-between mb-4">
-                      <div
-                        className={`p-3 rounded-2xl ${card.bg} ${card.iconColor}`}
-                      >
-                        <card.icon className="w-6 h-6" />
-                      </div>
+                    <div
+                      className={`w-10 h-10 rounded-xl ${card.bg} ${card.iconColor} flex items-center justify-center mb-4`}
+                    >
+                      <card.icon className="w-5 h-5" />
                     </div>
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                       {card.label}
                     </p>
                     <p
-                      className={`text-2xl sm:text-3xl md:text-4xl font-black mt-1 tracking-tight ${card.color}`}
+                      className={`text-xl sm:text-2xl font-black mt-1 tracking-tight ${card.color}`}
                     >
                       {card.value}
                     </p>

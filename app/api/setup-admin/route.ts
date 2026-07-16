@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebaseAdmin";
+import bcrypt from "bcryptjs";
 
 export async function GET(req: NextRequest) {
   try {
+    const setupSecret = req.headers.get("x-setup-secret");
+    if (!setupSecret || setupSecret !== process.env.SETUP_SECRET) {
+      return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
+    }
+
     const searchParams = req.nextUrl.searchParams;
     const accessKey = searchParams.get("accessKey");
     const schoolName = searchParams.get("schoolName") || "EduResults";
@@ -23,9 +29,10 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Set up admin credentials
+    // Set up admin credentials (hashed)
+    const hashedKey = await bcrypt.hash(accessKey, 12);
     await adminDb.collection("adminConfig").doc("credentials").set({
-      accessKey,
+      accessKey: hashedKey,
       createdAt: new Date().toISOString(),
     });
 
@@ -38,7 +45,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       success: true,
       message: "Admin setup completed successfully! You can now register an admin account at /admin/login using this access key.",
-      accessKey,
       schoolName,
     });
   } catch (error: any) {

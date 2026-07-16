@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminAuth, adminDb } from "@/lib/firebaseAdmin";
-import { checkRateLimit, rateLimitResponse } from "@/lib/rateLimit";
+import { checkRateLimit, rateLimitResponse, getIP } from "@/lib/rateLimit";
 
 // 24 hours in milliseconds
 const SESSION_DURATION = 24 * 60 * 60 * 1000;
 
 export async function POST(req: NextRequest) {
-  const ip = req.headers.get("x-forwarded-for") ?? "unknown";
+  const ip = getIP(req);
   if (!checkRateLimit(`session:${ip}`, 20, 60 * 60 * 1000)) {
     const { error, status } = rateLimitResponse();
     return NextResponse.json({ error }, { status });
@@ -19,24 +19,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid request." }, { status: 400 });
     }
 
-    console.log("Session API: Received ID token length:", idToken.length);
-    console.log("Session API: Role:", role);
-
     // First, verify the ID token to get the UID
     let decodedToken;
     try {
       decodedToken = await adminAuth.verifyIdToken(idToken);
-      console.log("Session API: Verified UID:", decodedToken.uid);
     } catch (verifyError: any) {
-      console.error(
-        "Session API: ID token verification failed:",
-        verifyError.message,
-      );
+      console.error("Session API: ID token verification failed");
       return NextResponse.json(
-        {
-          error: "Invalid authentication token.",
-          details: verifyError.message,
-        },
+        { error: "Invalid authentication token." },
         { status: 401 },
       );
     }
@@ -48,12 +38,8 @@ export async function POST(req: NextRequest) {
     const userDoc = await adminDb.collection(collectionName).doc(uid).get();
 
     if (!userDoc.exists) {
-      console.warn(`Session API: No ${role} profile found for UID: ${uid}`);
       return NextResponse.json(
-        {
-          error: `No ${role} account found.`,
-          details: `Please ensure you are using the correct portal and your account exists in the ${collectionName} collection.`,
-        },
+        { error: `No ${role} account found. Please ensure you are using the correct portal.` },
         { status: 403 },
       );
     }
@@ -62,11 +48,6 @@ export async function POST(req: NextRequest) {
     const sessionCookie = await adminAuth.createSessionCookie(idToken, {
       expiresIn: SESSION_DURATION,
     });
-
-    console.log(
-      "Session API: Session cookie created successfully, length:",
-      sessionCookie.length,
-    );
 
     const cookieName = role === "teacher" ? "teacher-token" : "parent-token";
 
@@ -79,19 +60,11 @@ export async function POST(req: NextRequest) {
       path: "/",
     });
 
-    console.log("Session API: Cookie set successfully");
-
     return response;
   } catch (error: any) {
-    console.error("Session API Error:", error);
-    console.error("Session API Error code:", error.code);
-    console.error("Session API Error stack:", error.stack);
+    console.error("Session API Error:", error.message);
     return NextResponse.json(
-      {
-        error: "Failed to create session. Please try again.",
-        details: error.message,
-        code: error.code,
-      },
+      { error: "Failed to create session. Please try again." },
       { status: 401 },
     );
   }

@@ -84,7 +84,8 @@ export default function OrphanedPage() {
   return (
     <div className="min-h-screen bg-slate-50 relative overflow-hidden">
       {/* Ambient background decoration */}
-      <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-rose-100/30 rounded-full blur-[120px] -z-10" />
+      <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-amber-100/30 rounded-full blur-[120px] -z-10" />
+      <div className="absolute bottom-0 left-0 w-[40%] h-[40%] bg-purple-100/30 rounded-full blur-[120px] -z-10" />
       
       <Navbar role="admin" />
       
@@ -92,7 +93,7 @@ export default function OrphanedPage() {
         <Breadcrumbs />
         
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-10 flex items-center gap-4">
-          <div className="p-3 bg-rose-500 rounded-2xl shadow-lg shadow-rose-100">
+          <div className="p-3 bg-blue-600 rounded-2xl shadow-lg shadow-blue-100">
             <AlertTriangle className="w-6 h-6 text-white" />
           </div>
           <div>
@@ -103,7 +104,7 @@ export default function OrphanedPage() {
 
         {loading ? <SkeletonTable rows={4} /> : students.length === 0 ? (
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-            className="bg-white/40 backdrop-blur-sm rounded-[32px] border border-white p-24 text-center">
+            className="bg-white/40 backdrop-blur-sm rounded-[32px] border border-white p-12 sm:p-20 text-center shadow-xl shadow-slate-200/40">
             <div className="w-20 h-20 bg-emerald-50 rounded-3xl flex items-center justify-center mx-auto mb-6">
               <CheckCircle2 className="w-10 h-10 text-emerald-400" />
             </div>
@@ -169,7 +170,7 @@ export default function OrphanedPage() {
                           <div className="flex justify-end">
                             <button 
                               onClick={() => { setAssignTarget(student); setSelectedTeacher(""); }}
-                              className="flex items-center gap-2 bg-slate-900 text-white px-5 py-2.5 rounded-xl text-xs font-black hover:bg-rose-600 transition-all shadow-lg shadow-slate-200"
+                              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-2xl text-xs font-black transition-all shadow-lg shadow-blue-100"
                             >
                               <UserPlus className="w-3.5 h-3.5" /> Reassign
                             </button>
@@ -218,7 +219,7 @@ export default function OrphanedPage() {
             <button 
               disabled={saving}
               onClick={handleAssign}
-              className="flex-1 bg-slate-900 text-white py-4 rounded-2xl font-black hover:bg-blue-600 transition-all shadow-xl"
+              className="flex-1 bg-blue-600 text-white py-4 rounded-2xl font-black hover:bg-blue-700 transition-all shadow-xl shadow-blue-200"
             >
               {saving ? "Processing..." : "Confirm Reassignment"}
             </button>

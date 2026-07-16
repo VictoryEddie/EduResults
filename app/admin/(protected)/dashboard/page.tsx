@@ -126,24 +126,24 @@ export default function AdminDashboard() {
       icon: GraduationCap,
       label: "Manage Teachers",
       desc: "Add, remove, assign access keys",
-      color: "text-blue-600",
-      bg: "bg-blue-50",
+      color: "text-slate-600",
+      bg: "bg-slate-100",
     },
     {
       href: "/admin/parents",
       icon: Users,
       label: "Manage Parents",
       desc: "View and remove parent accounts",
-      color: "text-indigo-600",
-      bg: "bg-indigo-50",
+      color: "text-slate-600",
+      bg: "bg-slate-100",
     },
     {
       href: "/admin/orphaned",
       icon: AlertTriangle,
       label: "Orphaned Records",
       desc: "Reassign students and classes",
-      color: "text-rose-500",
-      bg: "bg-rose-50",
+      color: "text-slate-600",
+      bg: "bg-slate-100",
     },
     {
       href: "/admin/audit",
@@ -158,15 +158,15 @@ export default function AdminDashboard() {
       icon: Settings,
       label: "School Settings",
       desc: "School name, motto, and logo",
-      color: "text-amber-600",
-      bg: "bg-amber-50",
+      color: "text-slate-600",
+      bg: "bg-slate-100",
     },
   ];
 
   return (
     <div className="min-h-screen bg-slate-50 relative overflow-hidden">
       {/* Ambient background decoration */}
-      <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-blue-100/30 rounded-full blur-[120px] -z-10" />
+      <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-amber-100/30 rounded-full blur-[120px] -z-10" />
       <div className="absolute bottom-0 left-0 w-[40%] h-[40%] bg-purple-100/30 rounded-full blur-[120px] -z-10" />
 
       <Navbar role="admin" />
@@ -181,7 +181,7 @@ export default function AdminDashboard() {
           className="mb-12"
         >
           <div className="flex items-center gap-4 mb-2">
-            <div className="p-2 bg-blue-600 rounded-xl">
+            <div className="p-3 bg-blue-600 rounded-2xl">
               <ShieldCheck className="w-6 h-6 text-white" />
             </div>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">

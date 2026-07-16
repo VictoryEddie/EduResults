@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebaseAdmin";
-import { checkRateLimit, rateLimitResponse } from "@/lib/rateLimit";
+import { checkRateLimit, rateLimitResponse, getIP } from "@/lib/rateLimit";
 import bcrypt from "bcryptjs";
 
 export async function POST(req: NextRequest) {
-  const ip = req.headers.get("x-forwarded-for") ?? "unknown";
+  const ip = getIP(req);
   if (!checkRateLimit(`admin-register:${ip}`, 5, 60 * 60 * 1000)) {
     const { error, status } = rateLimitResponse();
     return NextResponse.json({ error }, { status });
@@ -27,7 +27,8 @@ export async function POST(req: NextRequest) {
     }
 
     const config = configDoc.data();
-    if (config?.accessKey !== accessKey) {
+    const isKeyValid = await bcrypt.compare(accessKey, config?.accessKey || "");
+    if (!isKeyValid) {
       return NextResponse.json({ error: "Invalid access key." }, { status: 401 });
     }
 

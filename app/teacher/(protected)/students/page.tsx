@@ -1,5 +1,6 @@
 "use client";
 import Navbar from "@/components/Navbar";
+import Modal from "@/components/Modal";
 import ErrorMessage from "@/components/ErrorMessage";
 import PageTransition from "@/components/PageTransition";
 import { SkeletonTable } from "@/components/Skeleton";
@@ -24,9 +25,10 @@ import {
   UserPlus,
   X,
   Trash2,
-  Check,
   ShieldCheck,
   Edit3,
+  Mail,
+  User,
 } from "lucide-react";
 
 interface Student {
@@ -46,10 +48,17 @@ export default function StudentsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
-  const [editingStudent, setEditingStudent] = useState<Student | null>(null);
-  const [editingEmail, setEditingEmail] = useState("");
+
+  // Edit modal state
+  const [editTarget, setEditTarget] = useState<Student | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editEmail, setEditEmail] = useState("");
   const [savingEdit, setSavingEdit] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
+
+  // Delete modal state
+  const [deleteTarget, setDeleteTarget] = useState<Student | null>(null);
+  const [savingDelete, setSavingDelete] = useState(false);
 
   const fetchStudents = async () => {
     if (!user) return;
@@ -100,13 +109,107 @@ export default function StudentsPage() {
     }
   };
 
-  const handleRemove = async (id: string) => {
-    if (!user) return;
+  const openEditModal = (student: Student) => {
+    const fullName =
+      student.name ||
+      `${student.firstName || ""} ${student.lastName || ""}`.trim();
+    setEditTarget(student);
+    setEditName(fullName);
+    setEditEmail(student.parentEmail);
+    setEditError(null);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!user || !editTarget) return;
+    if (!editName.trim()) {
+      setEditError("Student name cannot be empty.");
+      return;
+    }
+    if (!editEmail.trim()) {
+      setEditError("Parent email cannot be empty.");
+      return;
+    }
+    setSavingEdit(true);
+    setEditError(null);
     try {
-      const studentDoc = students.find((s) => s.id === id);
+      const updates: Record<string, string> = {};
+      const oldName =
+        editTarget.name ||
+        `${editTarget.firstName || ""} ${editTarget.lastName || ""}`.trim();
+
+      if (editName.trim() !== oldName) {
+        updates.name = editName.trim();
+      }
+      if (editEmail.trim().toLowerCase() !== editTarget.parentEmail) {
+        updates.parentEmail = editEmail.trim().toLowerCase();
+      }
+
+      if (Object.keys(updates).length > 0) {
+        await updateDoc(
+          doc(db, "teachers", user.uid, "students", editTarget.id),
+          updates,
+        );
+
+        // Write audit log entries to the server
+        if (updates.name) {
+          await fetch("/api/admin/audit", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              action: "student_name_updated",
+              studentId: editTarget.id,
+              oldName,
+              newName: updates.name,
+              teacherId: user.uid,
+              teacherName: user.name,
+              className: user.className,
+            }),
+          }).catch(() => {}); // Non-blocking — don't fail the edit if audit fails
+        }
+        if (updates.parentEmail) {
+          await fetch("/api/admin/audit", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              action: "student_email_updated",
+              studentId: editTarget.id,
+              studentName: updates.name ?? oldName,
+              oldEmail: editTarget.parentEmail,
+              newEmail: updates.parentEmail,
+              teacherId: user.uid,
+              teacherName: user.name,
+              className: user.className,
+            }),
+          }).catch(() => {});
+        }
+
+        setStudents(
+          students.map((s) =>
+            s.id === editTarget.id ? { ...s, ...updates } : s,
+          ),
+        );
+      }
+      setEditTarget(null);
+    } catch (err: unknown) {
+      setEditError(getFirestoreError((err as { code?: string }).code ?? ""));
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
+  const handleRemove = async () => {
+    if (!user || !deleteTarget) return;
+    setSavingDelete(true);
+    try {
+      const studentDoc = students.find((s) => s.id === deleteTarget.id);
       if (!studentDoc) return;
+
+      const fullName =
+        studentDoc.name ||
+        `${studentDoc.firstName || ""} ${studentDoc.lastName || ""}`.trim();
+
       const batch = writeBatch(db);
-      batch.set(doc(db, "orphanedStudents", id), {
+      batch.set(doc(db, "orphanedStudents", deleteTarget.id), {
         ...studentDoc,
         originalTeacherId: user.uid,
         originalTeacherName: user.name,
@@ -114,38 +217,31 @@ export default function StudentsPage() {
         orphanedAt: serverTimestamp(),
         archivedByTeacher: true,
       });
-      batch.delete(doc(db, "teachers", user.uid, "students", id));
+      batch.delete(doc(db, "teachers", user.uid, "students", deleteTarget.id));
       await batch.commit();
-      setStudents(students.filter((s) => s.id !== id));
-      setConfirmDelete(null);
-    } catch (err: unknown) {
-      setError(getFirestoreError((err as { code?: string }).code ?? ""));
-    }
-  };
 
-  const handleEditEmail = async () => {
-    if (!user || !editingStudent) return;
-    setSavingEdit(true);
-    try {
-      await updateDoc(
-        doc(db, "teachers", user.uid, "students", editingStudent.id),
-        {
-          parentEmail: editingEmail.toLowerCase(),
-        },
-      );
-      setStudents(
-        students.map((s) =>
-          s.id === editingStudent.id
-            ? { ...s, parentEmail: editingEmail.toLowerCase() }
-            : s,
-        ),
-      );
-      setEditingStudent(null);
-      setEditingEmail("");
+      // Write audit log
+      await fetch("/api/admin/audit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "student_removed",
+          studentId: deleteTarget.id,
+          studentName: fullName,
+          parentEmail: studentDoc.parentEmail,
+          teacherId: user.uid,
+          teacherName: user.name,
+          className: user.className,
+        }),
+      }).catch(() => {});
+
+      setStudents(students.filter((s) => s.id !== deleteTarget.id));
+      setDeleteTarget(null);
     } catch (err: unknown) {
       setError(getFirestoreError((err as { code?: string }).code ?? ""));
+      setDeleteTarget(null);
     } finally {
-      setSavingEdit(false);
+      setSavingDelete(false);
     }
   };
 
@@ -153,7 +249,8 @@ export default function StudentsPage() {
     <PageTransition>
       <div className="min-h-screen bg-slate-50 relative overflow-hidden">
         {/* Ambient background decoration */}
-        <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-blue-100/30 rounded-full blur-[120px] -z-10" />
+        <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-amber-100/30 rounded-full blur-[120px] -z-10" />
+        <div className="absolute bottom-0 left-0 w-[40%] h-[40%] bg-purple-100/30 rounded-full blur-[120px] -z-10" />
 
         <Navbar role="teacher" />
 
@@ -174,7 +271,7 @@ export default function StudentsPage() {
                   Students
                 </h2>
                 <p className="text-slate-500 font-medium">
-                  {students.length} active students in your class
+                  {students.length} active student{students.length !== 1 ? "s" : ""} in your class
                 </p>
               </div>
             </div>
@@ -182,7 +279,7 @@ export default function StudentsPage() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => setShowForm(!showForm)}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold transition-all shadow-lg ${showForm ? "bg-slate-200 text-slate-600" : "bg-slate-900 text-white shadow-slate-200 hover:bg-blue-600"}`}
+              className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-bold transition-all shadow-lg ${showForm ? "bg-slate-200 text-slate-600 hover:bg-slate-300 shadow-none" : "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-100"}`}
             >
               {showForm ? (
                 <X className="w-4 h-4" />
@@ -226,7 +323,7 @@ export default function StudentsPage() {
                         setForm({ ...form, name: e.target.value })
                       }
                       required
-                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-medium"
                     />
                   </div>
                   <div>
@@ -241,7 +338,7 @@ export default function StudentsPage() {
                         setForm({ ...form, parentEmail: e.target.value })
                       }
                       required
-                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-medium"
                     />
                   </div>
                 </div>
@@ -264,9 +361,9 @@ export default function StudentsPage() {
           {loading ? (
             <SkeletonTable rows={5} />
           ) : students.length === 0 ? (
-            <div className="bg-white/40 backdrop-blur-sm rounded-[32px] border border-white p-20 text-center">
-              <div className="w-20 h-20 bg-slate-100 rounded-3xl flex items-center justify-center mx-auto mb-6">
-                <Users className="w-10 h-10 text-slate-300" />
+            <div className="bg-white/40 backdrop-blur-sm rounded-[32px] border border-white p-12 sm:p-20 text-center shadow-xl shadow-slate-200/40">
+              <div className="w-20 h-20 bg-blue-50 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                <Users className="w-10 h-10 text-blue-500" />
               </div>
               <h3 className="text-xl font-bold text-slate-900 mb-2">
                 No students yet
@@ -283,16 +380,13 @@ export default function StudentsPage() {
                 hidden: {},
                 show: { transition: { staggerChildren: 0.05 } },
               }}
-              className="grid grid-cols-1 gap-4"
+              className="grid grid-cols-1 gap-3"
             >
               {students.map((student) => {
-                // Compute full name, using name if available, otherwise firstName + lastName
                 const fullName =
                   student.name ||
                   `${student.firstName || ""} ${student.lastName || ""}`.trim();
-                const initial = fullName
-                  ? fullName.charAt(0).toUpperCase()
-                  : "?";
+                const initial = fullName ? fullName.charAt(0).toUpperCase() : "?";
 
                 return (
                   <motion.div
@@ -301,111 +395,41 @@ export default function StudentsPage() {
                       hidden: { opacity: 0, y: 8 },
                       show: { opacity: 1, y: 0 },
                     }}
-                    className="group flex items-center justify-between bg-white rounded-[24px] px-6 py-4 border border-slate-100 hover:border-blue-200 hover:shadow-xl hover:shadow-blue-500/5 transition-all"
+                    className="group flex items-center bg-white rounded-[20px] px-5 py-4 border border-slate-100 hover:border-blue-200 hover:shadow-xl hover:shadow-blue-500/5 transition-all"
                   >
-                    <div className="flex items-center gap-5">
-                      <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center group-hover:bg-blue-50 transition-colors">
-                        <span className="text-lg font-bold text-slate-400 group-hover:text-blue-600">
-                          {initial}
-                        </span>
-                      </div>
-                      <div>
-                        <p className="font-bold text-slate-900 text-lg">
-                          {fullName || "Unknown Student"}
-                        </p>
-                        <div className="flex items-center gap-3 mt-1">
-                          <span className="text-xs text-slate-400 font-medium">
-                            {student.parentEmail}
-                          </span>
-                        </div>
-                      </div>
+                    {/* Avatar */}
+                    <div className="w-11 h-11 bg-slate-50 rounded-xl flex items-center justify-center group-hover:bg-blue-50 transition-colors flex-shrink-0">
+                      <span className="text-base font-bold text-slate-400 group-hover:text-blue-600 transition-colors">
+                        {initial}
+                      </span>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                      <AnimatePresence mode="wait">
-                        {editingStudent?.id === student.id ? (
-                          <motion.div
-                            key="editForm"
-                            initial={{ opacity: 0, x: 10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: 10 }}
-                            className="flex items-center gap-2"
-                          >
-                            <input
-                              type="email"
-                              value={editingEmail}
-                              onChange={(e) => setEditingEmail(e.target.value)}
-                              className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all w-full sm:w-64"
-                              placeholder="Enter new email"
-                            />
-                            <button
-                              onClick={handleEditEmail}
-                              disabled={savingEdit}
-                              className="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-blue-700 transition-all disabled:opacity-60 flex items-center gap-2"
-                            >
-                              {savingEdit ? (
-                                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                              ) : (
-                                <Check className="w-4 h-4" />
-                              )}
-                              Save
-                            </button>
-                            <button
-                              onClick={() => {
-                                setEditingStudent(null);
-                                setEditingEmail("");
-                              }}
-                              className="bg-slate-100 text-slate-600 px-4 py-2 rounded-xl text-sm font-bold hover:bg-slate-200 transition-all"
-                            >
-                              Cancel
-                            </button>
-                          </motion.div>
-                        ) : confirmDelete === student.id ? (
-                          <motion.div
-                            key="confirm"
-                            initial={{ opacity: 0, x: 10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: 10 }}
-                            className="flex gap-2"
-                          >
-                            <button
-                              onClick={() => handleRemove(student.id)}
-                              className="bg-red-50 text-red-600 px-4 py-2 rounded-xl text-xs font-bold hover:bg-red-600 hover:text-white transition-all flex items-center gap-2"
-                            >
-                              <Check className="w-3 h-3" /> Confirm
-                            </button>
-                            <button
-                              onClick={() => setConfirmDelete(null)}
-                              className="bg-slate-50 text-slate-400 px-4 py-2 rounded-xl text-xs font-bold hover:bg-slate-100 transition-all"
-                            >
-                              Cancel
-                            </button>
-                          </motion.div>
-                        ) : (
-                          <motion.div
-                            key="buttons"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            className="flex items-center gap-1"
-                          >
-                            <button
-                              onClick={() => {
-                                setEditingStudent(student);
-                                setEditingEmail(student.parentEmail);
-                              }}
-                              className="p-3 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
-                            >
-                              <Edit3 className="w-5 h-5" />
-                            </button>
-                            <button
-                              onClick={() => setConfirmDelete(student.id)}
-                              className="p-3 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
-                            >
-                              <Trash2 className="w-5 h-5" />
-                            </button>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
+                    {/* Info */}
+                    <div className="ml-4 flex-1 min-w-0">
+                      <p className="font-bold text-slate-900 text-base leading-tight truncate">
+                        {fullName || "Unknown Student"}
+                      </p>
+                      <p className="text-xs text-slate-400 font-medium mt-0.5 truncate">
+                        {student.parentEmail}
+                      </p>
+                    </div>
+
+                    {/* Action buttons — always visible, sized for touch */}
+                    <div className="flex items-center gap-1 ml-3 flex-shrink-0">
+                      <button
+                        onClick={() => openEditModal(student)}
+                        title="Edit student"
+                        className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
+                      >
+                        <Edit3 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => setDeleteTarget(student)}
+                        title="Remove student"
+                        className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
                   </motion.div>
                 );
@@ -414,6 +438,128 @@ export default function StudentsPage() {
           )}
         </main>
       </div>
+
+      {/* ── Edit Student Modal ─────────────────────────────── */}
+      <Modal
+        open={!!editTarget}
+        onClose={() => { setEditTarget(null); setEditError(null); }}
+        title="Edit Student"
+      >
+        <div className="p-2 space-y-5">
+          {/* Student name indicator */}
+          <div className="flex items-center gap-4 bg-blue-50 p-5 rounded-[20px]">
+            <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center flex-shrink-0">
+              <span className="text-white font-black text-lg">
+                {editTarget
+                  ? (editTarget.name || `${editTarget.firstName || ""} ${editTarget.lastName || ""}`.trim()).charAt(0).toUpperCase()
+                  : ""}
+              </span>
+            </div>
+            <div>
+              <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest">
+                Editing Student
+              </p>
+              <p className="text-lg font-black text-blue-700 leading-tight">
+                {editTarget?.name ||
+                  `${editTarget?.firstName || ""} ${editTarget?.lastName || ""}`.trim()}
+              </p>
+            </div>
+          </div>
+
+          {editError && (
+            <p className="text-sm text-red-600 bg-red-50 px-4 py-3 rounded-xl font-medium">
+              {editError}
+            </p>
+          )}
+
+          <div>
+            <label className="flex items-center gap-2 text-sm font-bold text-slate-700 mb-2 ml-1">
+              <User className="w-4 h-4 text-blue-600" /> Student Full Name
+            </label>
+            <input
+              type="text"
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              placeholder="e.g. John Doe"
+              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all"
+            />
+          </div>
+
+          <div>
+            <label className="flex items-center gap-2 text-sm font-bold text-slate-700 mb-2 ml-1">
+              <Mail className="w-4 h-4 text-blue-600" /> Parent Email Address
+            </label>
+            <input
+              type="email"
+              value={editEmail}
+              onChange={(e) => setEditEmail(e.target.value)}
+              placeholder="parent@example.com"
+              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all"
+            />
+            <p className="text-[11px] text-slate-400 mt-2 ml-1">
+              Changing this email will immediately affect which parent can view this student's results.
+            </p>
+          </div>
+
+          <div className="flex gap-3 pt-2">
+            <button
+              disabled={savingEdit}
+              onClick={handleSaveEdit}
+              className="flex-1 bg-blue-600 text-white py-4 rounded-2xl font-black hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 disabled:opacity-60"
+            >
+              {savingEdit ? "Saving..." : "Save Changes"}
+            </button>
+            <button
+              onClick={() => { setEditTarget(null); setEditError(null); }}
+              className="flex-1 bg-slate-100 text-slate-500 py-4 rounded-2xl font-black hover:bg-slate-200 transition-all"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* ── Delete Confirmation Modal ──────────────────────── */}
+      <Modal
+        open={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        title="Remove Student"
+      >
+        <div className="p-2">
+          <div className="w-16 h-16 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center mb-6 mx-auto">
+            <Trash2 className="w-8 h-8" />
+          </div>
+          <p className="text-slate-600 text-center mb-2 font-medium leading-relaxed">
+            Are you sure you want to remove{" "}
+            <span className="font-black text-slate-900">
+              {deleteTarget?.name ||
+                `${deleteTarget?.firstName || ""} ${deleteTarget?.lastName || ""}`.trim()}
+            </span>{" "}
+            from your class?
+          </p>
+          <p className="text-center text-xs text-slate-400 mb-8 leading-relaxed">
+            Their record will be moved to{" "}
+            <span className="text-rose-500 font-bold">orphaned students</span>{" "}
+            and remain visible to the admin. This action is{" "}
+            <span className="font-bold">logged</span>.
+          </p>
+          <div className="flex gap-3">
+            <button
+              disabled={savingDelete}
+              onClick={handleRemove}
+              className="flex-1 bg-rose-600 text-white py-4 rounded-2xl font-black hover:bg-rose-700 transition-all shadow-lg shadow-rose-200 disabled:opacity-60"
+            >
+              {savingDelete ? "Removing..." : "Yes, Remove Student"}
+            </button>
+            <button
+              onClick={() => setDeleteTarget(null)}
+              className="flex-1 bg-slate-100 text-slate-500 py-4 rounded-2xl font-black hover:bg-slate-200 transition-all"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </Modal>
     </PageTransition>
   );
 }

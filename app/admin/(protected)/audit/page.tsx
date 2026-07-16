@@ -209,7 +209,8 @@ export default function AuditLogPage() {
   return (
     <div className="min-h-screen bg-slate-50 relative overflow-hidden">
       {/* Ambient background decoration */}
-      <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-slate-200/40 rounded-full blur-[120px] -z-10" />
+      <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-amber-100/30 rounded-full blur-[120px] -z-10" />
+      <div className="absolute bottom-0 left-0 w-[40%] h-[40%] bg-purple-100/30 rounded-full blur-[120px] -z-10" />
 
       <Navbar role="admin" />
 
@@ -221,7 +222,7 @@ export default function AuditLogPage() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-10 flex items-center gap-4"
         >
-          <div className="p-3 bg-slate-900 rounded-2xl shadow-lg shadow-slate-200">
+          <div className="p-3 bg-blue-600 rounded-2xl shadow-lg shadow-blue-100">
             <History className="w-6 h-6 text-white" />
           </div>
           <div>
@@ -237,12 +238,13 @@ export default function AuditLogPage() {
         {loading ? (
           <SkeletonTable rows={8} />
         ) : entries.length === 0 ? (
-          <div className="bg-white/40 backdrop-blur-sm rounded-[32px] border border-white p-20 text-center">
-            <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <ClipboardList className="w-8 h-8 text-slate-300" />
+          <div className="bg-white/40 backdrop-blur-sm rounded-[32px] border border-white p-12 sm:p-20 text-center shadow-xl shadow-slate-200/40">
+            <div className="w-20 h-20 bg-blue-50 rounded-3xl flex items-center justify-center mx-auto mb-4">
+              <ClipboardList className="w-10 h-10 text-blue-500" />
             </div>
-            <p className="text-slate-400 font-bold italic">
-              No actions recorded in the system yet.
+            <p className="text-slate-500 font-bold text-lg mb-2">No actions recorded</p>
+            <p className="text-slate-400 text-sm">
+              The system audit log is currently empty.
             </p>
           </div>
         ) : (

@@ -149,7 +149,8 @@ export default function AdminTeachersPage() {
   return (
     <div className="min-h-screen bg-slate-50 relative overflow-hidden">
       {/* Ambient background decoration */}
-      <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-blue-100/30 rounded-full blur-[120px] -z-10" />
+      <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-amber-100/30 rounded-full blur-[120px] -z-10" />
+      <div className="absolute bottom-0 left-0 w-[40%] h-[40%] bg-purple-100/30 rounded-full blur-[120px] -z-10" />
 
       <Navbar role="admin" />
 
@@ -178,7 +179,7 @@ export default function AdminTeachersPage() {
           <div className="flex flex-col md:flex-row gap-3">
             <button
               onClick={() => setAddModalOpen(true)}
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-blue-100 transition-all"
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-blue-100 transition-all"
             >
               <UserPlus className="w-4 h-4" /> Add Teacher
             </button>
@@ -287,10 +288,14 @@ export default function AdminTeachersPage() {
                 </tbody>
               </table>
               {filtered.length === 0 && (
-                <div className="py-20 text-center">
-                  <p className="text-slate-400 font-bold italic">
-                    No teachers found matching your search.
-                  </p>
+                <div className="p-20 text-center">
+                  <div className="bg-white/40 backdrop-blur-sm rounded-[32px] border border-white p-12 sm:p-20 text-center shadow-xl shadow-slate-200/40">
+                    <div className="w-20 h-20 bg-blue-50 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                      <Search className="w-10 h-10 text-blue-500" />
+                    </div>
+                    <p className="text-slate-500 font-bold text-lg mb-2">No teachers found</p>
+                    <p className="text-slate-400 text-sm">No teachers match your search criteria.</p>
+                  </div>
                 </div>
               )}
             </div>
@@ -352,7 +357,7 @@ export default function AdminTeachersPage() {
                 onChange={(e) =>
                   setNewTeacher({ ...newTeacher, firstName: e.target.value })
                 }
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+                className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all"
               />
             </div>
             <div>
@@ -366,7 +371,7 @@ export default function AdminTeachersPage() {
                 onChange={(e) =>
                   setNewTeacher({ ...newTeacher, lastName: e.target.value })
                 }
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+                className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all"
               />
             </div>
           </div>

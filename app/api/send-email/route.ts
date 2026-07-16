@@ -1,17 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendMail } from "@/lib/mailer";
 import { adminDb } from "@/lib/firebaseAdmin";
-import { checkRateLimit, rateLimitResponse } from "@/lib/rateLimit";
+import { checkRateLimit, rateLimitResponse, getIP } from "@/lib/rateLimit";
+import { verifySession } from "@/lib/verifySession";
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await verifySession(req);
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorised." }, { status: 401 });
+    }
+
     const { name, email } = await req.json();
 
     if (!name || !email) {
       return NextResponse.json({ error: "Name and email are required." }, { status: 400 });
     }
 
-    if (!checkRateLimit(`send-email:${email}`, 5, 60 * 60 * 1000)) {
+    const ip = getIP(req);
+    if (!checkRateLimit(`send-email:${ip}`, 5, 60 * 60 * 1000)) {
+      const { error, status } = rateLimitResponse();
+      return NextResponse.json({ error }, { status });
+    }
+
+    // Secondary rate limit by email to prevent abuse
+    if (!checkRateLimit(`send-email-addr:${email}`, 5, 60 * 60 * 1000)) {
       const { error, status } = rateLimitResponse();
       return NextResponse.json({ error }, { status });
     }

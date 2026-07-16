@@ -141,8 +141,8 @@ export default function AdminLoginPage() {
   return (
     <main className="min-h-screen flex items-center justify-center bg-slate-50 relative overflow-hidden">
       {/* Decorative background elements */}
-      <div className="absolute -top-24 -left-24 w-96 h-96 bg-blue-100 rounded-full blur-3xl opacity-40" />
-      <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-[#F59E0B]/10 rounded-full blur-3xl opacity-40" />
+      <div className="absolute -top-24 -left-24 w-96 h-96 bg-amber-100/30 rounded-full blur-3xl opacity-40" />
+      <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-purple-100/30 rounded-full blur-3xl opacity-40" />
 
       <motion.div
         initial={{ opacity: 0, scale: 0.98 }}
@@ -157,7 +157,7 @@ export default function AdminLoginPage() {
           <span className="mr-2">←</span> Back to Portals
         </Link>
 
-        <div className="bg-white rounded-[32px] shadow-2xl shadow-slate-200/60 p-8 md:p-12 border border-slate-100">
+        <div className="bg-white rounded-[32px] shadow-2xl shadow-slate-200/60 p-8 md:p-12 border border-white">
           {/* Header */}
           <div className="mb-10 flex flex-col items-center md:items-start">
             {settings.logo && (
@@ -268,7 +268,7 @@ export default function AdminLoginPage() {
                     value={form.name}
                     onChange={handleChange}
                     required
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#1B2B4B]"
+                    className="w-full border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all"
                   />
                 </div>
 
@@ -283,7 +283,7 @@ export default function AdminLoginPage() {
                     value={form.email}
                     onChange={handleChange}
                     required
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#1B2B4B]"
+                    className="w-full border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all"
                   />
                 </div>
 
@@ -298,7 +298,7 @@ export default function AdminLoginPage() {
                     value={form.accessKey}
                     onChange={handleChange}
                     required
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#1B2B4B]"
+                    className="w-full border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all"
                   />
                 </div>
 
@@ -313,7 +313,7 @@ export default function AdminLoginPage() {
                     value={form.password}
                     onChange={handleChange}
                     required
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#1B2B4B]"
+                    className="w-full border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all"
                   />
                 </div>
 
@@ -328,7 +328,7 @@ export default function AdminLoginPage() {
                     value={form.confirm}
                     onChange={handleChange}
                     required
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#1B2B4B]"
+                    className="w-full border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all"
                   />
                 </div>
 
@@ -363,7 +363,7 @@ export default function AdminLoginPage() {
                     value={form.email}
                     onChange={handleChange}
                     required
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#1B2B4B]"
+                    className="w-full border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all"
                   />
                 </div>
 
@@ -378,7 +378,7 @@ export default function AdminLoginPage() {
                     value={form.password}
                     onChange={handleChange}
                     required
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#1B2B4B]"
+                    className="w-full border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all"
                   />
                 </div>
 

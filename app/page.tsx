@@ -29,8 +29,8 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-slate-50 flex flex-col justify-center items-center p-6 relative overflow-hidden dark:bg-slate-900">
       {/* Background decorations */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-blue-400/10 blur-[100px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-purple-400/10 blur-[100px] pointer-events-none" />
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-amber-100/30 blur-[100px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-purple-100/30 blur-[100px] pointer-events-none" />
 
       <div className="max-w-4xl w-full z-10 relative">
         <div className="text-center mb-16">

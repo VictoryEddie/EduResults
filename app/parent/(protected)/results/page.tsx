@@ -235,8 +235,8 @@ function ResultsContent() {
     <PageTransition>
       <div className="min-h-screen bg-slate-50 relative overflow-hidden">
         {/* Ambient background decoration */}
-        <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-blue-100/20 rounded-full blur-[120px] -z-10" />
-        <div className="absolute bottom-0 left-0 w-[40%] h-[40%] bg-emerald-100/20 rounded-full blur-[120px] -z-10" />
+        <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-amber-100/30 rounded-full blur-[120px] -z-10" />
+        <div className="absolute bottom-0 left-0 w-[40%] h-[40%] bg-purple-100/30 rounded-full blur-[120px] -z-10" />
 
         <Navbar role="parent" />
 
@@ -247,8 +247,8 @@ function ResultsContent() {
             className="mb-10"
           >
             <div className="flex items-center gap-4 mb-2">
-              <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm">
-                <GraduationCap className="w-6 h-6 text-blue-600" />
+              <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-100">
+                <GraduationCap className="w-6 h-6 text-white" />
               </div>
               <div>
                 <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight capitalize">
@@ -664,12 +664,13 @@ function ResultsContent() {
                 key="empty"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="flex flex-col items-center justify-center py-24 gap-4"
+                className="bg-white/40 backdrop-blur-sm rounded-[32px] border border-white p-12 sm:p-20 text-center shadow-xl shadow-slate-200/40"
               >
-                <div className="w-20 h-20 bg-slate-100 rounded-[32px] flex items-center justify-center">
-                  <Search className="w-8 h-8 text-slate-300" />
+                <div className="w-20 h-20 bg-blue-50 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                  <Search className="w-10 h-10 text-blue-500" />
                 </div>
-                <p className="text-slate-400 font-bold text-sm">
+                <h3 className="text-xl font-bold text-slate-900 mb-2">Select Filters</h3>
+                <p className="text-slate-500 font-medium max-w-xs mx-auto">
                   Select an academic term to reveal the scorecard.
                 </p>
               </motion.div>

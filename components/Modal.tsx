@@ -82,7 +82,7 @@ export default function Modal({ open, onClose, title, children }: ModalProps) {
               <div className="flex items-center justify-between mb-4">
                 <h3
                   id="modal-title"
-                  className="text-lg font-bold text-[#1B2B4B]"
+                  className="text-lg font-bold text-slate-900"
                 >
                   {title}
                 </h3>

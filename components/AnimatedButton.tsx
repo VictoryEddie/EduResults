@@ -8,7 +8,7 @@ interface AnimatedButtonProps extends React.ButtonHTMLAttributes<HTMLButtonEleme
 }
 
 const variants = {
-  primary: "bg-[#1B2B4B] text-white hover:bg-[#F59E0B] hover:text-[#1B2B4B]",
+  primary: "bg-[#1B2B4B] text-white",
   secondary:
     "border border-[#1B2B4B] text-[#1B2B4B] hover:bg-[#1B2B4B] hover:text-white",
   danger: "bg-red-500 text-white hover:bg-red-600",
@@ -26,7 +26,7 @@ export default function AnimatedButton({
   return (
     <motion.button
       whileTap={{ scale: 0.97 }}
-      whileHover={{ scale: disabled || loading ? 1 : 1.01 }}
+      whileHover={{ scale: disabled || loading ? 1 : 1.03 }}
       transition={{ duration: 0.1 }}
       disabled={disabled || loading}
       className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${variants[variant]} ${className}`}

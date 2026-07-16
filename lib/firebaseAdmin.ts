@@ -9,10 +9,8 @@ if (!getApps().length) {
   if (!privateKey) {
     throw new Error("FIREBASE_ADMIN_PRIVATE_KEY environment variable is not set");
   }
-  
-  // Debug: Log the first 50 chars of the private key to check format
-  console.log("Firebase Admin Private Key (first 50 chars):", privateKey.substring(0, 50));
-  
+
+
   // Replace escaped newlines in private key from env var
   const formattedPrivateKey = privateKey.replace(/\\n/g, "\n");
   

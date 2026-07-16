@@ -50,11 +50,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           credentials: "include", // VERY IMPORTANT: This sends the session cookie to the server!
         });
         
-        console.log("/api/auth/me response status:", res.status);
-        
         if (res.ok) {
           const profile = await res.json();
-          console.log("/api/auth/me profile received:", profile);
           setUser(profile);
         } else {
           const errorData = await res.json().catch(() => {});

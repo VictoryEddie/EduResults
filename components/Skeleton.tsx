@@ -1,10 +1,10 @@
 export function SkeletonLine({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse bg-gray-200 rounded-lg ${className}`} />;
+  return <div className={`animate-pulse bg-slate-200 rounded-lg ${className}`} />;
 }
 
 export function SkeletonCard() {
   return (
-    <div className="border border-gray-200 rounded-xl p-5 space-y-3">
+    <div className="border border-slate-200 rounded-[24px] p-5 space-y-3 bg-white/70 backdrop-blur-md shadow-xl shadow-slate-200/40">
       <SkeletonLine className="h-4 w-1/3" />
       <SkeletonLine className="h-8 w-1/2" />
     </div>
@@ -13,13 +13,13 @@ export function SkeletonCard() {
 
 export function SkeletonTable({ rows = 5 }: { rows?: number }) {
   return (
-    <div className="border border-gray-200 rounded-xl overflow-hidden">
-      <div className="bg-gray-100 px-4 py-3 flex gap-4">
+    <div className="border border-slate-200 rounded-[24px] overflow-hidden bg-white/80 backdrop-blur-md shadow-2xl shadow-slate-200/40">
+      <div className="bg-slate-50/50 px-4 py-3 flex gap-4">
         <SkeletonLine className="h-4 w-1/3" />
         <SkeletonLine className="h-4 w-1/4 ml-auto" />
       </div>
       {Array.from({ length: rows }).map((_, i) => (
-        <div key={i} className="px-4 py-3 border-t border-gray-100 flex gap-4 items-center">
+        <div key={i} className="px-4 py-3 border-t border-slate-100 flex gap-4 items-center">
           <SkeletonLine className="h-4 w-1/3" />
           <SkeletonLine className="h-4 w-1/4 ml-auto" />
         </div>
@@ -47,13 +47,13 @@ export function SkeletonResults() {
     <div className="space-y-8 animate-pulse">
       {/* Stats row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="col-span-1 md:col-span-2 h-48 bg-gray-100 rounded-[32px]" />
-        <div className="h-48 bg-gray-200 rounded-[32px]" />
+        <div className="col-span-1 md:col-span-2 h-48 bg-slate-100 rounded-[32px]" />
+        <div className="h-48 bg-slate-200 rounded-[32px]" />
       </div>
       {/* Table block */}
-      <div className="h-96 bg-gray-100 rounded-[32px]" />
+      <div className="h-96 bg-slate-100 rounded-[32px]" />
       {/* Remark block */}
-      <div className="h-32 bg-gray-200 rounded-[32px]" />
+      <div className="h-32 bg-slate-200 rounded-[32px]" />
     </div>
   );
 }

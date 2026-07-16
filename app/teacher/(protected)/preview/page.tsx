@@ -53,7 +53,9 @@ interface ScoreRow {
 }
 interface Student {
   id: string;
-  name: string;
+  name?: string;
+  firstName?: string;
+  lastName?: string;
 }
 
 /** Converts a numeric total into a letter grade */
@@ -97,7 +99,7 @@ export default function PreviewPage() {
   useEffect(() => {
     if (!user) return;
     getDocs(collection(db, "teachers", user.uid, "students")).then((snap) =>
-      setStudents(snap.docs.map((d) => ({ id: d.id, name: d.data().name }))),
+      setStudents(snap.docs.map((d) => ({ id: d.id, ...d.data() } as Student))),
     );
   }, [user]);
 
@@ -206,6 +208,9 @@ export default function PreviewPage() {
   };
 
   const student = students.find((s) => s.id === selectedStudentId);
+  const studentFullName = student
+    ? student.name || `${student.firstName || ""} ${student.lastName || ""}`.trim() || "Unknown Student"
+    : "";
   const termKey =
     selectedYear && selectedTerm ? `${selectedYear}-${selectedTerm}` : "";
 
@@ -215,7 +220,7 @@ export default function PreviewPage() {
     setExporting(true);
     await exportResult(
       {
-        studentName: student.name,
+        studentName: studentFullName,
         className: user?.className ?? "",
         term: selectedTerm,
         year: selectedYear,
@@ -254,7 +259,9 @@ export default function PreviewPage() {
             (sum: number, r: ScoreRow) => sum + r.total,
             0,
           );
-          return { id: sDoc.id, name: sDoc.data().name, data: rData, total };
+          const sd = sDoc.data();
+          const sName = sd.name || `${sd.firstName || ""} ${sd.lastName || ""}`.trim() || "Unknown";
+          return { id: sDoc.id, name: sName, data: rData, total };
         }),
       );
 
@@ -296,7 +303,8 @@ export default function PreviewPage() {
     <PageTransition>
       <div className="min-h-screen bg-slate-50 relative overflow-hidden">
         {/* Ambient background decoration */}
-        <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-blue-100/30 rounded-full blur-[120px] -z-10" />
+        <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-amber-100/30 rounded-full blur-[120px] -z-10" />
+        <div className="absolute bottom-0 left-0 w-[40%] h-[40%] bg-purple-100/30 rounded-full blur-[120px] -z-10" />
 
         <Navbar role="teacher" />
 
@@ -308,7 +316,7 @@ export default function PreviewPage() {
             animate={{ opacity: 1, y: 0 }}
             className="mb-10 flex items-center gap-4"
           >
-            <div className="p-3 bg-emerald-500 rounded-2xl shadow-lg shadow-emerald-100">
+            <div className="p-3 bg-blue-600 rounded-2xl shadow-lg shadow-blue-100">
               <Eye className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -373,11 +381,17 @@ export default function PreviewPage() {
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
               >
                 <option value="">-- Select Student --</option>
-                {students.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}
-                  </option>
-                ))}
+                {students.map((s) => {
+                  const sName =
+                    s.name ||
+                    `${s.firstName || ""} ${s.lastName || ""}`.trim() ||
+                    "Unknown Student";
+                  return (
+                    <option key={s.id} value={s.id}>
+                      {sName}
+                    </option>
+                  );
+                })}
               </select>
             </div>
           </div>
@@ -415,7 +429,7 @@ export default function PreviewPage() {
                   <button
                     disabled={exporting || loading}
                     onClick={() => handleBulkExport("pdf")}
-                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-lg shadow-blue-500/20"
+                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-2xl font-bold transition-all shadow-lg shadow-blue-500/20"
                   >
                     <FileJson className="w-4 h-4" /> PDF
                   </button>
@@ -451,12 +465,12 @@ export default function PreviewPage() {
                   <div className="flex items-center gap-5">
                     <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center">
                       <span className="text-2xl font-black text-blue-600">
-                        {student.name.charAt(0)}
+                        {studentFullName.charAt(0).toUpperCase()}
                       </span>
                     </div>
                     <div>
                       <h3 className="text-2xl font-black text-slate-900 tracking-tight">
-                        {student.name}
+                        {studentFullName}
                       </h3>
                       <p className="text-slate-500 font-bold flex items-center gap-2 mt-1">
                         {selectedTerm} {selectedYear}{" "}
@@ -490,7 +504,7 @@ export default function PreviewPage() {
                     </button>
                     <Link
                       href={`/teacher/print?studentId=${selectedStudentId}&term=${encodeURIComponent(termKey)}`}
-                      className="flex items-center gap-2 bg-slate-900 text-white px-6 py-3 rounded-xl font-black hover:bg-blue-600 transition-all shadow-lg shadow-slate-200"
+                      className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-2xl font-black transition-all shadow-lg shadow-blue-100"
                     >
                       <Printer className="w-4 h-4" /> Print
                     </Link>
@@ -634,10 +648,10 @@ export default function PreviewPage() {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="bg-white/40 backdrop-blur-sm rounded-[32px] border border-white p-20 text-center"
+                  className="bg-white/40 backdrop-blur-sm rounded-[32px] border border-white p-12 sm:p-20 text-center shadow-xl shadow-slate-200/40"
                 >
                   <div className="w-20 h-20 bg-blue-50 rounded-3xl flex items-center justify-center mx-auto mb-6">
-                    <Search className="w-10 h-10 text-blue-300" />
+                    <Search className="w-10 h-10 text-blue-500" />
                   </div>
                   <h3 className="text-xl font-bold text-slate-900 mb-2">
                     Select Filters
@@ -647,7 +661,7 @@ export default function PreviewPage() {
                     selectedTerm &&
                     selectedYear &&
                     scores.length === 0
-                      ? `No results found for ${student.name} in this term.`
+                       ? `No results found for ${studentFullName} in this term.`
                       : "Pick a student and academic term to preview results."}
                   </p>
                 </motion.div>

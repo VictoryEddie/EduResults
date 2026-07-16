@@ -19,7 +19,7 @@ service cloud.firestore {
 
     // Parents — profile management
     match /parents/{parentId} {
-      allow get: if isSignedIn();
+      allow get: if isSignedIn() && request.auth.uid == parentId;
       allow list: if false;
       allow create, update: if isSignedIn() && request.auth.uid == parentId;
       allow delete: if false;
@@ -27,7 +27,7 @@ service cloud.firestore {
 
     // Teachers — profile and student management
     match /teachers/{teacherId} {
-      allow get: if isSignedIn();
+      allow get: if isSignedIn() && request.auth.uid == teacherId;
       allow list: if false; 
       allow create, update: if isSignedIn() && request.auth.uid == teacherId;
       allow delete: if false;

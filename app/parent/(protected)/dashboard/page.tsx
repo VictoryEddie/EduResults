@@ -77,7 +77,7 @@ export default function ParentDashboard() {
   return (
     <div className="min-h-screen bg-slate-50 relative overflow-hidden">
       {/* Ambient background decoration */}
-      <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-blue-100/30 rounded-full blur-[120px] -z-10" />
+      <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-amber-100/30 rounded-full blur-[120px] -z-10" />
       <div className="absolute bottom-0 left-0 w-[40%] h-[40%] bg-purple-100/30 rounded-full blur-[120px] -z-10" />
 
       <Navbar role="parent" />
@@ -112,7 +112,7 @@ export default function ParentDashboard() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white/60 backdrop-blur-md rounded-[32px] border border-white p-12 text-center shadow-xl shadow-slate-200/50"
+              className="bg-white/40 backdrop-blur-sm rounded-[32px] border border-white p-12 sm:p-20 text-center shadow-xl shadow-slate-200/40"
             >
               <div className="w-20 h-20 bg-blue-50 rounded-3xl flex items-center justify-center mx-auto mb-6">
                 <ShieldAlert className="w-10 h-10 text-blue-500" />
@@ -145,7 +145,7 @@ export default function ParentDashboard() {
                 <motion.div key={child.id} custom={i} variants={cardVariants}>
                   <Link
                     href={`/parent/results?studentId=${child.id}&class=${encodeURIComponent(child.className)}&name=${encodeURIComponent(child.name)}`}
-                    className="group flex items-center gap-5 bg-white rounded-[24px] p-6 border border-slate-100 hover:border-blue-200 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-300 relative overflow-hidden"
+                    className="bg-white/70 backdrop-blur-md rounded-[20px] sm:rounded-[24px] p-4 sm:p-5 border border-white shadow-xl shadow-slate-200/40 hover:shadow-2xl hover:shadow-blue-500/10 transition-all group duration-300 relative overflow-hidden"
                   >
                     <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
                       <ArrowRight className="w-5 h-5 text-blue-500" />

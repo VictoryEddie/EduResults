@@ -115,7 +115,8 @@ export default function AdminParentsPage() {
   return (
     <div className="min-h-screen bg-slate-50 relative overflow-hidden">
       {/* Ambient background decoration */}
-      <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-indigo-100/30 rounded-full blur-[120px] -z-10" />
+      <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-amber-100/30 rounded-full blur-[120px] -z-10" />
+      <div className="absolute bottom-0 left-0 w-[40%] h-[40%] bg-purple-100/30 rounded-full blur-[120px] -z-10" />
 
       <Navbar role="admin" />
 
@@ -128,7 +129,7 @@ export default function AdminParentsPage() {
           className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6"
         >
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-indigo-600 rounded-2xl shadow-lg shadow-indigo-100">
+            <div className="p-3 bg-blue-600 rounded-2xl shadow-lg shadow-blue-100">
               <Users className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -144,7 +145,7 @@ export default function AdminParentsPage() {
           <div className="flex flex-col md:flex-row gap-3">
             <button
               onClick={() => setAddModalOpen(true)}
-              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-indigo-100 transition-all"
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-blue-100 transition-all"
             >
               <UserPlus className="w-4 h-4" /> Add Parent
             </button>
@@ -230,13 +231,14 @@ export default function AdminParentsPage() {
                 </tbody>
               </table>
               {filtered.length === 0 && (
-                <div className="py-24 text-center">
-                  <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <Search className="w-8 h-8 text-slate-200" />
+                <div className="p-20 text-center">
+                  <div className="bg-white/40 backdrop-blur-sm rounded-[32px] border border-white p-12 sm:p-20 text-center shadow-xl shadow-slate-200/40">
+                    <div className="w-20 h-20 bg-blue-50 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                      <Search className="w-10 h-10 text-blue-500" />
+                    </div>
+                    <p className="text-slate-500 font-bold text-lg mb-2">No parents found</p>
+                    <p className="text-slate-400 text-sm">No parents match your search criteria.</p>
                   </div>
-                  <p className="text-slate-400 font-bold italic">
-                    No parents found matching your search.
-                  </p>
                 </div>
               )}
             </div>
@@ -301,7 +303,7 @@ export default function AdminParentsPage() {
                 onChange={(e) =>
                   setNewParent({ ...newParent, firstName: e.target.value })
                 }
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
+                className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all"
               />
             </div>
             <div>
@@ -315,7 +317,7 @@ export default function AdminParentsPage() {
                 onChange={(e) =>
                   setNewParent({ ...newParent, lastName: e.target.value })
                 }
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
+                className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all"
               />
             </div>
           </div>
@@ -351,7 +353,7 @@ export default function AdminParentsPage() {
             <button
               disabled={saving}
               onClick={handleAddParent}
-              className="flex-1 bg-indigo-600 text-white py-4 rounded-2xl font-black hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200"
+              className="flex-1 bg-blue-600 text-white py-4 rounded-2xl font-black hover:bg-blue-700 transition-all shadow-lg shadow-blue-200"
             >
               {saving ? "Adding..." : "Add Parent"}
             </button>

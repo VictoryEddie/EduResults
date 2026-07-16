@@ -2,14 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebaseAdmin";
 import { verifySession } from "@/lib/verifySession";
 import { sendMail } from "@/lib/mailer";
-import { checkRateLimit, rateLimitResponse } from "@/lib/rateLimit";
+import { checkRateLimit, rateLimitResponse, getIP } from "@/lib/rateLimit";
 
 export async function POST(req: NextRequest) {
   const session = await verifySession(req);
   if (!session)
     return NextResponse.json({ error: "Unauthorised." }, { status: 401 });
 
-  const ip = req.headers.get("x-forwarded-for") ?? "unknown";
+  const ip = getIP(req);
   if (!checkRateLimit(`publish-results:${session.uid}`, 10, 60 * 60 * 1000)) {
     const { error, status } = rateLimitResponse();
     return NextResponse.json({ error }, { status });

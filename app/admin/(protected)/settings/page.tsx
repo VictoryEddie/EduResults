@@ -84,6 +84,7 @@ export default function AdminSettings() {
     <div className="min-h-screen bg-slate-50 relative overflow-hidden">
       {/* Ambient background decoration */}
       <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-amber-100/30 rounded-full blur-[120px] -z-10" />
+      <div className="absolute bottom-0 left-0 w-[40%] h-[40%] bg-purple-100/30 rounded-full blur-[120px] -z-10" />
 
       <Navbar role="admin" />
 
@@ -95,7 +96,7 @@ export default function AdminSettings() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-10 flex items-center gap-4"
         >
-          <div className="p-3 bg-slate-900 rounded-2xl shadow-lg shadow-slate-200">
+          <div className="p-3 bg-blue-600 rounded-2xl shadow-lg shadow-blue-100">
             <Settings className="w-6 h-6 text-white" />
           </div>
           <div>
@@ -193,7 +194,7 @@ export default function AdminSettings() {
           <button
             type="submit"
             disabled={saving}
-            className="w-full bg-slate-900 text-white py-5 rounded-2xl font-black hover:bg-blue-600 transition-all shadow-xl shadow-slate-200 flex items-center justify-center gap-3 disabled:opacity-50"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-5 rounded-2xl font-black transition-all shadow-xl shadow-blue-200 flex items-center justify-center gap-3 disabled:opacity-50"
           >
             {saving ? (
               <Loader2 className="w-5 h-5 animate-spin" />
