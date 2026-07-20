@@ -8,7 +8,7 @@ import type { NextRequest } from "next/server";
  * to prevent crashes. Full cryptographic/database verification is done in the 
  * Server Component Layouts where we have access to the full Node.js runtime.
  */
-export function middleware(req: NextRequest) {
+export function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   const hasAdmin = req.cookies.has("admin-token");

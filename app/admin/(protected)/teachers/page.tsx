@@ -262,7 +262,7 @@ export default function AdminTeachersPage() {
                           </span>
                         </td>
                         <td className="px-8 py-5">
-                          <div className="flex gap-2 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="flex gap-2 justify-end transition-opacity">
                             <button
                               onClick={() => {
                                 setClassTarget(teacher);

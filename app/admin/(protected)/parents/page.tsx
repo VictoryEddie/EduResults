@@ -215,7 +215,7 @@ export default function AdminParentsPage() {
                           </span>
                         </td>
                         <td className="px-8 py-5">
-                          <div className="flex justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="flex justify-end transition-opacity">
                             <button
                               onClick={() => setDeleteTarget(parent)}
                               title="Remove Account"

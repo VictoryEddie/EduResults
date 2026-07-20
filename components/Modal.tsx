@@ -43,15 +43,21 @@ export default function Modal({ open, onClose, title, children }: ModalProps) {
     };
 
     document.addEventListener("keydown", handleKeyDown);
-    /* Move focus into modal when it opens */
-    setTimeout(
-      () =>
-        modalRef.current?.querySelector<HTMLElement>("button, input")?.focus(),
-      50,
-    );
 
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [open, onClose]);
+
+  /* Move focus into modal when it opens */
+  useEffect(() => {
+    if (open) {
+      const timer = setTimeout(
+        () =>
+          modalRef.current?.querySelector<HTMLElement>("button, input")?.focus(),
+        50,
+      );
+      return () => clearTimeout(timer);
+    }
+  }, [open]);
 
   return (
     <LazyMotion features={domAnimation}>
