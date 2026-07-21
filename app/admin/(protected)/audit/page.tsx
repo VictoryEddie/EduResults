@@ -198,13 +198,31 @@ export default function AuditLogPage() {
   usePageTitle("Audit Log");
   const [entries, setEntries] = useState<AuditEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+
+  const fetchLog = async (cursor?: string) => {
+    const url = cursor ? `/api/admin/audit?cursor=${cursor}` : "/api/admin/audit";
+    const r = await fetch(url);
+    const d = await r.json();
+    if (cursor) {
+      setEntries((prev) => [...prev, ...(d.entries ?? [])]);
+    } else {
+      setEntries(d.entries ?? []);
+    }
+    setNextCursor(d.nextCursor ?? null);
+  };
 
   useEffect(() => {
-    fetch("/api/admin/audit")
-      .then((r) => r.json())
-      .then((d) => setEntries(d.entries ?? []))
-      .finally(() => setLoading(false));
+    fetchLog().finally(() => setLoading(false));
   }, []);
+
+  const loadMore = async () => {
+    if (!nextCursor || loadingMore) return;
+    setLoadingMore(true);
+    await fetchLog(nextCursor);
+    setLoadingMore(false);
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 relative overflow-hidden">
@@ -333,6 +351,18 @@ export default function AuditLogPage() {
                 </tbody>
               </table>
             </div>
+            
+            {nextCursor && (
+              <div className="p-6 border-t border-slate-50 text-center bg-slate-50/50">
+                <button
+                  onClick={loadMore}
+                  disabled={loadingMore}
+                  className="bg-white border border-slate-200 text-slate-700 px-8 py-3 rounded-xl font-bold shadow-sm hover:bg-slate-50 hover:border-slate-300 transition-all disabled:opacity-50"
+                >
+                  {loadingMore ? "Loading..." : "Load Older Records"}
+                </button>
+              </div>
+            )}
           </motion.div>
         )}
       </main>

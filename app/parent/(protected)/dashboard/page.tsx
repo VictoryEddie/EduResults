@@ -145,15 +145,13 @@ export default function ParentDashboard() {
                 <motion.div key={child.id} custom={i} variants={cardVariants}>
                   <Link
                     href={`/parent/results?studentId=${child.id}&class=${encodeURIComponent(child.className)}&name=${encodeURIComponent(child.name)}`}
-                    className="bg-white/70 backdrop-blur-md rounded-[20px] sm:rounded-[24px] p-4 sm:p-5 border border-white shadow-xl shadow-slate-200/40 hover:shadow-2xl hover:shadow-blue-500/10 transition-all group duration-300 relative overflow-hidden"
+                    className="bg-white/70 backdrop-blur-md rounded-[20px] sm:rounded-[24px] p-4 sm:p-5 border border-white shadow-xl shadow-slate-200/40 hover:shadow-2xl hover:shadow-blue-500/10 transition-all group duration-300 relative overflow-hidden flex items-center gap-4"
                   >
                     <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
                       <ArrowRight className="w-5 h-5 text-blue-500" />
                     </div>
 
-                    <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center group-hover:bg-blue-50 transition-colors">
-                      <GraduationCap className="w-8 h-8 text-slate-400 group-hover:text-blue-500 transition-colors" />
-                    </div>
+                    <GraduationCap className="w-8 h-8 text-slate-400 group-hover:text-blue-500 transition-colors" />
 
                     <div className="flex-1">
                       <p className="font-bold text-lg text-slate-900 group-hover:text-blue-600 transition-colors capitalize">

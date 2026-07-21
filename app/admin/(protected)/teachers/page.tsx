@@ -4,7 +4,8 @@ import Modal from "@/components/Modal";
 import AnimatedButton from "@/components/AnimatedButton";
 import { SkeletonTable } from "@/components/Skeleton";
 import { useToast } from "@/components/Toast";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -29,8 +30,16 @@ interface Teacher {
 export default function AdminTeachersPage() {
   usePageTitle("Manage Teachers");
   const { showToast } = useToast();
-  const [teachers, setTeachers] = useState<Teacher[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: teachers = [], isLoading: loading, isError, refetch: fetchTeachers } = useQuery<Teacher[]>({
+    queryKey: ['admin-teachers'],
+    queryFn: async () => {
+      const res = await fetch("/api/admin/teachers");
+      if (!res.ok) throw new Error("Failed to fetch teachers");
+      const data = await res.json();
+      return data.teachers ?? [];
+    }
+  });
+
   const [deleteTarget, setDeleteTarget] = useState<Teacher | null>(null);
   const [classTarget, setClassTarget] = useState<Teacher | null>(null);
   const [addModalOpen, setAddModalOpen] = useState(false);
@@ -44,17 +53,6 @@ export default function AdminTeachersPage() {
   });
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState("");
-
-  const fetchTeachers = useCallback(async () => {
-    const res = await fetch("/api/admin/teachers");
-    const data = await res.json();
-    setTeachers(data.teachers ?? []);
-    setLoading(false);
-  }, []);
-
-  useEffect(() => {
-    fetchTeachers();
-  }, [fetchTeachers]);
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -198,6 +196,13 @@ export default function AdminTeachersPage() {
 
         {loading ? (
           <SkeletonTable rows={6} />
+        ) : isError ? (
+          <div className="p-20 text-center bg-rose-50/50 rounded-[32px] border border-rose-100">
+            <h3 className="text-rose-600 font-bold mb-2">Failed to load teachers</h3>
+            <button onClick={() => fetchTeachers()} className="px-4 py-2 bg-white rounded-xl shadow-sm border border-rose-200 text-rose-600 font-medium hover:bg-rose-50 transition-colors">
+              Try Again
+            </button>
+          </div>
         ) : (
           <motion.div
             initial={{ opacity: 0, scale: 0.98 }}

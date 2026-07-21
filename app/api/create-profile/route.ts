@@ -4,7 +4,7 @@ import { checkRateLimit, rateLimitResponse, getIP } from "@/lib/rateLimit";
 
 export async function POST(req: NextRequest) {
   const ip = getIP(req);
-  if (!checkRateLimit(`create-profile:${ip}`, 10, 60 * 60 * 1000)) {
+  if (!await checkRateLimit(`create-profile:${ip}`, 10, 60 * 60 * 1000)) {
     const { error, status } = rateLimitResponse();
     return NextResponse.json({ error }, { status });
   }

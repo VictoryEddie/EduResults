@@ -21,7 +21,6 @@ if (!getApps().length) {
       privateKey: formattedPrivateKey,
     }),
   });
-  console.log("Firebase Admin SDK initialized successfully");
 } else {
   adminApp = getApps()[0];
 }

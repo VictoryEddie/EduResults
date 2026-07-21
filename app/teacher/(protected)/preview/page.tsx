@@ -196,14 +196,20 @@ export default function PreviewPage() {
     }
   };
 
-  /* Update a single score field in the draft as the teacher types */
   const handleScoreChange = (
     index: number,
     field: "ca" | "exam",
     value: string,
   ) => {
     const updated = [...draftScores];
-    updated[index] = { ...updated[index], [field]: parseFloat(value) || 0 };
+    let parsed = parseFloat(value) || 0;
+    
+    // Enforce constraints
+    if (parsed < 0) parsed = 0;
+    if (field === "ca" && parsed > 40) parsed = 40;
+    if (field === "exam" && parsed > 60) parsed = 60;
+
+    updated[index] = { ...updated[index], [field]: parsed };
     setDraftScores(updated);
   };
 

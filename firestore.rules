@@ -12,7 +12,7 @@ service cloud.firestore {
 
     // Access keys — only allow individual lookups, prevent listing the whole collection
     match /accessKeys/{key} {
-      allow get: if true;
+      allow get: if false;
       allow list: if false;
       allow write: if false;
     }

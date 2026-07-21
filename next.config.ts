@@ -25,8 +25,7 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   // Allow mobile testing on local network
-  // @ts-expect-error - Next.js internal type might not be updated
-  allowedDevOrigins: ["192.168.1.113", "localhost"],
+  allowedDevOrigins: ["192.168.1.108", "localhost"],
   async headers() {
     return [
       {

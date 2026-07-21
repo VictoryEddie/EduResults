@@ -7,7 +7,7 @@ const SESSION_DURATION = 24 * 60 * 60 * 1000;
 
 export async function POST(req: NextRequest) {
   const ip = getIP(req);
-  if (!checkRateLimit(`session:${ip}`, 20, 60 * 60 * 1000)) {
+  if (!await checkRateLimit(`session:${ip}`, 20, 60 * 60 * 1000)) {
     const { error, status } = rateLimitResponse();
     return NextResponse.json({ error }, { status });
   }

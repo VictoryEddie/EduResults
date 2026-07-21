@@ -18,13 +18,13 @@ export async function POST(req: NextRequest) {
     }
 
     const ip = getIP(req);
-    if (!checkRateLimit(`send-email:${ip}`, 5, 60 * 60 * 1000)) {
+    if (!await checkRateLimit(`send-email:${ip}`, 5, 60 * 60 * 1000)) {
       const { error, status } = rateLimitResponse();
       return NextResponse.json({ error }, { status });
     }
 
     // Secondary rate limit by email to prevent abuse
-    if (!checkRateLimit(`send-email-addr:${email}`, 5, 60 * 60 * 1000)) {
+    if (!await checkRateLimit(`send-email-addr:${email}`, 5, 60 * 60 * 1000)) {
       const { error, status } = rateLimitResponse();
       return NextResponse.json({ error }, { status });
     }

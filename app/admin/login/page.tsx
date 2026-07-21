@@ -8,9 +8,6 @@ import AnimatedButton from "@/components/AnimatedButton";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useSchoolSettings } from "@/hooks/useSchoolSettings";
 
-// Demo admin credentials
-const DEMO_ADMIN_EMAIL = "demo.admin@eduresults.com";
-const DEMO_ADMIN_PASSWORD = "demo1234";
 
 export default function AdminLoginPage() {
   usePageTitle("Admin Portal");
@@ -115,14 +112,10 @@ export default function AdminLoginPage() {
     setDemoLoading(true);
     setError(null);
     try {
-      // Login directly as demo admin (accounts already created)
-      const res = await fetch("/api/admin/login", {
+      // Login via secure backend endpoint
+      const res = await fetch("/api/admin/demo-login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: DEMO_ADMIN_EMAIL,
-          password: DEMO_ADMIN_PASSWORD,
-        }),
       });
 
       const data = await res.json();
@@ -179,13 +172,15 @@ export default function AdminLoginPage() {
           </div>
 
           {/* Demo login button */}
-          <AnimatedButton
-            onClick={handleDemoLogin}
-            loading={demoLoading}
-            className="w-full mb-6 bg-gradient-to-r from-[#1B2B4B] to-[#2d3f66] text-white"
-          >
-            🚀 Quick Demo Login
-          </AnimatedButton>
+          {process.env.NEXT_PUBLIC_ENABLE_DEMO_LOGIN === "true" && (
+            <AnimatedButton
+              onClick={handleDemoLogin}
+              loading={demoLoading}
+              className="w-full mb-6 bg-gradient-to-r from-[#1B2B4B] to-[#2d3f66] text-white"
+            >
+              🚀 Quick Demo Login
+            </AnimatedButton>
+          )}
 
           <div className="relative mb-6">
             <div className="absolute inset-0 flex items-center">

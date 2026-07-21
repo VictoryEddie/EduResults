@@ -4,7 +4,7 @@ import { checkRateLimit, rateLimitResponse } from "@/lib/rateLimit";
 
 export async function POST(req: NextRequest) {
   const ip = req.headers.get("x-forwarded-for") ?? "unknown";
-  if (!checkRateLimit(`validate-class:${ip}`, 10, 60 * 60 * 1000)) {
+  if (!await checkRateLimit(`validate-class:${ip}`, 10, 60 * 60 * 1000)) {
     const { error, status } = rateLimitResponse();
     return NextResponse.json({ error }, { status });
   }

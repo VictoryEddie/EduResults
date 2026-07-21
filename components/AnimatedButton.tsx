@@ -33,17 +33,22 @@ export default function AnimatedButton({
       {...(props as React.ComponentProps<typeof motion.button>)}
     >
       {loading ? (
-        <span className="flex items-center gap-2">
+        <span className="flex items-center justify-center gap-1.5 h-full min-h-[20px]">
           <motion.span
-            animate={{ rotate: 360 }}
-            transition={{
-              duration: 0.8,
-              repeat: Infinity,
-              ease: "linear",
-            }}
-            className="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full"
+            animate={{ y: [0, -4, 0], scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 0.6, repeat: Infinity, ease: "easeInOut", delay: 0 }}
+            className="w-1.5 h-1.5 bg-current rounded-full"
           />
-          Please wait...
+          <motion.span
+            animate={{ y: [0, -4, 0], scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 0.6, repeat: Infinity, ease: "easeInOut", delay: 0.15 }}
+            className="w-1.5 h-1.5 bg-current rounded-full"
+          />
+          <motion.span
+            animate={{ y: [0, -4, 0], scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 0.6, repeat: Infinity, ease: "easeInOut", delay: 0.3 }}
+            className="w-1.5 h-1.5 bg-current rounded-full"
+          />
         </span>
       ) : (
         children

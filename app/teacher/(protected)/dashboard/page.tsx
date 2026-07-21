@@ -361,41 +361,12 @@ export default function TeacherDashboard() {
                 </h2>
               </div>
               <div className="flex items-center gap-3 mt-2 ml-12">
-                {editingClass ? (
-                  <div className="flex items-center gap-2 bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
-                    <input
-                      value={newClassName}
-                      onChange={(e) => setNewClassName(e.target.value)}
-                      className="bg-transparent px-3 py-1 text-sm font-medium focus:outline-none w-32"
-                    />
-                    <button
-                      onClick={handleSaveClassName}
-                      disabled={savingClass}
-                      className="bg-slate-900 text-white text-xs px-4 py-1.5 rounded-lg hover:bg-blue-600 transition-colors font-bold"
-                    >
-                      {savingClass ? "..." : "Save"}
-                    </button>
-                    <button
-                      onClick={() => setEditingClass(false)}
-                      className="text-xs text-slate-400 hover:text-slate-600 px-2"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                ) : (
                   <div className="flex items-center gap-2">
                     <p className="text-slate-500 font-medium">
                       Class:{" "}
-                      <span className="text-slate-900">{user?.className}</span>
+                      <span className="text-slate-900 font-bold">{user?.className || "Unassigned"}</span>
                     </p>
-                    <button
-                      onClick={() => setEditingClass(true)}
-                      className="p-1 text-slate-400 hover:text-blue-600 transition-colors"
-                    >
-                      <Edit3 className="w-4 h-4" />
-                    </button>
                   </div>
-                )}
               </div>
             </div>
             <div>

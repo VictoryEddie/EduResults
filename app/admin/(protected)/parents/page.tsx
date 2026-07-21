@@ -4,7 +4,8 @@ import Modal from "@/components/Modal";
 import AnimatedButton from "@/components/AnimatedButton";
 import { SkeletonTable } from "@/components/Skeleton";
 import { useToast } from "@/components/Toast";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -28,8 +29,16 @@ interface Parent {
 export default function AdminParentsPage() {
   usePageTitle("Manage Parents");
   const { showToast } = useToast();
-  const [parents, setParents] = useState<Parent[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: parents = [], isLoading: loading, isError, refetch: fetchParents } = useQuery<Parent[]>({
+    queryKey: ['admin-parents'],
+    queryFn: async () => {
+      const res = await fetch("/api/admin/parents");
+      if (!res.ok) throw new Error("Failed to fetch parents");
+      const data = await res.json();
+      return data.parents ?? [];
+    }
+  });
+
   const [deleteTarget, setDeleteTarget] = useState<Parent | null>(null);
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [newParent, setNewParent] = useState({
@@ -40,17 +49,6 @@ export default function AdminParentsPage() {
   });
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState("");
-
-  const fetchParents = useCallback(async () => {
-    const res = await fetch("/api/admin/parents");
-    const data = await res.json();
-    setParents(data.parents ?? []);
-    setLoading(false);
-  }, []);
-
-  useEffect(() => {
-    fetchParents();
-  }, [fetchParents]);
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -164,6 +162,13 @@ export default function AdminParentsPage() {
 
         {loading ? (
           <SkeletonTable rows={6} />
+        ) : isError ? (
+          <div className="p-20 text-center bg-rose-50/50 rounded-[32px] border border-rose-100">
+            <h3 className="text-rose-600 font-bold mb-2">Failed to load parents</h3>
+            <button onClick={() => fetchParents()} className="px-4 py-2 bg-white rounded-xl shadow-sm border border-rose-200 text-rose-600 font-medium hover:bg-rose-50 transition-colors">
+              Try Again
+            </button>
+          </div>
         ) : (
           <motion.div
             initial={{ opacity: 0, scale: 0.98 }}

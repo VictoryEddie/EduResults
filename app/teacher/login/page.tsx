@@ -13,25 +13,22 @@ import AnimatedButton from "@/components/AnimatedButton";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useSchoolSettings } from "@/hooks/useSchoolSettings";
 
-// Demo teachers data
+// Demo teachers data - stripped of passwords
 const DEMO_TEACHERS = [
   {
     name: "Adewale Okafor",
     email: "adewale.okafor@eduresults.com",
     className: "JSS 1A",
-    password: "demo1234",
   },
   {
     name: "Fatima Abdullahi",
     email: "fatima.abdullahi@eduresults.com",
     className: "SSS 2B",
-    password: "demo1234",
   },
   {
     name: "Chidera Nwankwo",
     email: "chidera.nwankwo@eduresults.com",
     className: "Primary 5C",
-    password: "demo1234",
   },
 ];
 
@@ -53,12 +50,22 @@ export default function TeacherLogin() {
     setDemoLoading(teacher.email);
     setError(null);
     try {
-      // Login as demo teacher
-      const { user } = await signInWithEmailAndPassword(
-        auth,
-        teacher.email,
-        teacher.password
-      );
+      // 1. Get custom token from backend
+      const demoRes = await fetch("/api/auth/demo-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role: "teacher", email: teacher.email }),
+      });
+
+      const demoData = await demoRes.json();
+      if (!demoRes.ok) {
+        setError(demoData.error || "Failed to initialize demo login.");
+        return;
+      }
+
+      // 2. Sign in with the custom token
+      const { signInWithCustomToken } = await import("firebase/auth");
+      const { user } = await signInWithCustomToken(auth, demoData.customToken);
 
       const idToken = await getIdToken(user, true);
       const res = await fetch("/api/session", {
@@ -181,18 +188,20 @@ export default function TeacherLogin() {
           </div>
 
           {/* Demo login buttons */}
-          <div className="space-y-3 mb-6">
-            {DEMO_TEACHERS.map((teacher) => (
-              <AnimatedButton
-                key={teacher.email}
-                onClick={() => handleDemoLogin(teacher)}
-                loading={demoLoading === teacher.email}
-                className="w-full bg-gradient-to-r from-[#1B2B4B] to-[#2d3f66] text-white"
-              >
-                👨‍🏫 Demo: {teacher.name} ({teacher.className})
-              </AnimatedButton>
-            ))}
-          </div>
+          {process.env.NEXT_PUBLIC_ENABLE_DEMO_LOGIN === "true" && (
+            <div className="space-y-3 mb-6">
+              {DEMO_TEACHERS.map((teacher) => (
+                <AnimatedButton
+                  key={teacher.email}
+                  onClick={() => handleDemoLogin(teacher)}
+                  loading={demoLoading === teacher.email}
+                  className="w-full bg-gradient-to-r from-[#1B2B4B] to-[#2d3f66] text-white"
+                >
+                  👨‍🏫 Demo: {teacher.name} ({teacher.className})
+                </AnimatedButton>
+              ))}
+            </div>
+          )}
 
           <div className="relative mb-6">
             <div className="absolute inset-0 flex items-center">

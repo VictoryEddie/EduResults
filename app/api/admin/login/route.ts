@@ -2,11 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebaseAdmin";
 import { checkRateLimit, rateLimitResponse, getIP } from "@/lib/rateLimit";
 import bcrypt from "bcryptjs";
-import { randomBytes } from "crypto";
+import crypto, { randomBytes } from "crypto";
 
 export async function POST(req: NextRequest) {
   const ip = getIP(req);
-  if (!checkRateLimit(`admin-login:${ip}`, 5, 60 * 60 * 1000)) {
+  if (!await checkRateLimit(`admin-login:${ip}`, 5, 60 * 60 * 1000)) {
     const { error, status } = rateLimitResponse();
     return NextResponse.json({ error }, { status });
   }
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     }
 
     /* Rate limit by email too — prevents distributed brute force */
-    if (!checkRateLimit(`admin-login-email:${email.toLowerCase()}`, 5, 60 * 60 * 1000)) {
+    if (!await checkRateLimit(`admin-login-email:${email.toLowerCase()}`, 5, 60 * 60 * 1000)) {
       const { error, status } = rateLimitResponse();
       return NextResponse.json({ error }, { status });
     }
@@ -61,12 +61,13 @@ export async function POST(req: NextRequest) {
 
     /* Use a cryptographically random token — not a predictable value */
     const secureToken = randomBytes(32).toString("hex");
+    const hashedToken = crypto.createHash("sha256").update(secureToken).digest("hex");
 
     /* Store the session in Firestore with an expiration time */
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + 10); // 10 hour session
 
-    await adminDb.collection("adminSessions").doc(secureToken).set({
+    await adminDb.collection("adminSessions").doc(hashedToken).set({
       adminEmail: email.toLowerCase(),
       startedAt: new Date().toISOString(),
       expiresAt: expiresAt.toISOString(),

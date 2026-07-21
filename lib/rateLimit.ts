@@ -1,41 +1,56 @@
 import { NextRequest } from "next/server";
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
 
-interface RateLimitEntry {
-  count: number;
-  reset: number;
-}
+const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
+const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
 
-/* NOTE FOR PRODUCTION (VERCEL):
-   This in-memory Map is reset on every serverless cold start, meaning rate limiting 
-   will be largely ineffective on Vercel. For a production deployment, replace this 
-   in-memory store with Upstash Redis (@upstash/ratelimit) which maintains state 
-   across serverless function instances. */
-const store = new Map<string, RateLimitEntry>();
+const redis = redisUrl && redisToken ? Redis.fromEnv() : null;
 
-/* Clean up expired entries every 10 minutes to prevent memory growing indefinitely.
-   On serverless platforms each function instance has its own store. */
+// Cache of ratelimit instances so we don't recreate them on every request
+const limiters = new Map<string, Ratelimit>();
+
+interface RateLimitEntry { count: number; reset: number; }
+const memoryStore = new Map<string, RateLimitEntry>();
+
+// Clean up memory store every 10 mins (fallback)
 setInterval(() => {
   const now = Date.now();
-  for (const [key, entry] of store.entries()) {
-    if (now > entry.reset) store.delete(key);
+  for (const [key, entry] of memoryStore.entries()) {
+    if (now > entry.reset) memoryStore.delete(key);
   }
 }, 10 * 60 * 1000);
 
 /**
  * Checks whether a request should be allowed based on rate limit rules.
- * Returns true if allowed, false if the limit has been exceeded.
- *
- * @param key      - Unique identifier for the requester (IP address or email)
- * @param max      - Maximum requests allowed in the time window
- * @param windowMs - Length of the time window in milliseconds
+ * Automatically uses Upstash Redis if configured, otherwise falls back to memory.
  */
-export function checkRateLimit(key: string, max: number, windowMs: number): boolean {
-  const now = Date.now();
-  const entry = store.get(key);
+export async function checkRateLimit(key: string, max: number, windowMs: number): Promise<boolean> {
+  if (redis) {
+    const windowSecs = Math.max(1, Math.floor(windowMs / 1000));
+    const limiterKey = `${max}-${windowSecs}s`;
+    
+    if (!limiters.has(limiterKey)) {
+      limiters.set(
+        limiterKey,
+        new Ratelimit({
+          redis,
+          limiter: Ratelimit.slidingWindow(max, `${windowSecs} s` as any),
+        })
+      );
+    }
+    
+    const limiter = limiters.get(limiterKey)!;
+    const { success } = await limiter.limit(key);
+    return success;
+  }
 
-  /* First request from this key, or the previous window has expired — start fresh */
+  // Fallback to in-memory
+  const now = Date.now();
+  const entry = memoryStore.get(key);
+
   if (!entry || now > entry.reset) {
-    store.set(key, { count: 1, reset: now + windowMs });
+    memoryStore.set(key, { count: 1, reset: now + windowMs });
     return true;
   }
 
@@ -45,7 +60,6 @@ export function checkRateLimit(key: string, max: number, windowMs: number): bool
   return true;
 }
 
-/** Returns a standard 429 error response used consistently across all API routes */
 export function rateLimitResponse() {
   return {
     error: "Too many requests. Please wait a moment and try again.",
@@ -53,10 +67,6 @@ export function rateLimitResponse() {
   };
 }
 
-/** 
- * Extracts the real client IP safely, accounting for proxies like Vercel's edge network.
- * Falls back to x-forwarded-for if x-real-ip is not available.
- */
 export function getIP(req: NextRequest): string {
   const realIp = req.headers.get("x-real-ip");
   if (realIp) return realIp;

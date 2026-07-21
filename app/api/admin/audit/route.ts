@@ -6,7 +6,7 @@ import { checkRateLimit, rateLimitResponse } from "@/lib/rateLimit";
 
 export async function GET(req: NextRequest) {
   const ip = req.headers.get("x-forwarded-for") ?? "unknown";
-  if (!checkRateLimit(`admin-audit:${ip}`, 30, 60 * 1000)) {
+  if (!await checkRateLimit(`admin-audit:${ip}`, 30, 60 * 1000)) {
     const { error, status } = rateLimitResponse();
     return NextResponse.json({ error }, { status });
   }
@@ -15,9 +15,17 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorised." }, { status: 401 });
   }
   try {
-    const snap = await adminDb.collection("auditLog").orderBy("timestamp", "desc").limit(100).get();
-    const entries = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-    return NextResponse.json({ entries });
+    const url = new URL(req.url);
+    const cursor = url.searchParams.get("cursor");
+    
+    let query = adminDb.collection("auditLog").orderBy("timestamp", "desc").limit(20);
+    if (cursor) query = query.startAfter(cursor);
+    
+    const snap = await query.get();
+    const entries = snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) }));
+    const nextCursor = entries.length === 20 ? entries[entries.length - 1].timestamp : null;
+    
+    return NextResponse.json({ entries, nextCursor });
   } catch {
     return NextResponse.json({ error: "Failed to load audit log." }, { status: 500 });
   }
@@ -30,7 +38,7 @@ export async function GET(req: NextRequest) {
  */
 export async function POST(req: NextRequest) {
   const ip = req.headers.get("x-forwarded-for") ?? "unknown";
-  if (!checkRateLimit(`audit-write:${ip}`, 60, 60 * 1000)) {
+  if (!await checkRateLimit(`audit-write:${ip}`, 60, 60 * 1000)) {
     const { error, status } = rateLimitResponse();
     return NextResponse.json({ error }, { status });
   }

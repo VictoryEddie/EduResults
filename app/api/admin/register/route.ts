@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 
 export async function POST(req: NextRequest) {
   const ip = getIP(req);
-  if (!checkRateLimit(`admin-register:${ip}`, 5, 60 * 60 * 1000)) {
+  if (!await checkRateLimit(`admin-register:${ip}`, 5, 60 * 60 * 1000)) {
     const { error, status } = rateLimitResponse();
     return NextResponse.json({ error }, { status });
   }

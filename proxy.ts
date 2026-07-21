@@ -1,19 +1,22 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+import { cookies } from "next/headers";
+
 /**
- * LIGHTWEIGHT MIDDLEWARE (Edge-Safe)
+ * LIGHTWEIGHT PROXY (Edge-Safe)
  * ---------------------------------
  * This runs on the Edge Runtime. We only do simple existence checks for cookies here
  * to prevent crashes. Full cryptographic/database verification is done in the 
  * Server Component Layouts where we have access to the full Node.js runtime.
  */
-export function proxy(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
+  const cookieStore = await cookies();
 
-  const hasAdmin = req.cookies.has("admin-token");
-  const hasTeacher = req.cookies.has("teacher-token");
-  const hasParent = req.cookies.has("parent-token");
+  const hasAdmin = cookieStore.has("admin-token");
+  const hasTeacher = cookieStore.has("teacher-token");
+  const hasParent = cookieStore.has("parent-token");
 
   /* Portal Root Redirects — Prevent 404s on directory roots */
   if (pathname === "/admin") return NextResponse.redirect(new URL("/admin/dashboard", req.url));

@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorised." }, { status: 401 });
 
   const ip = getIP(req);
-  if (!checkRateLimit(`publish-results:${session.uid}`, 10, 60 * 60 * 1000)) {
+  if (!await checkRateLimit(`publish-results:${session.uid}`, 10, 60 * 60 * 1000)) {
     const { error, status } = rateLimitResponse();
     return NextResponse.json({ error }, { status });
   }

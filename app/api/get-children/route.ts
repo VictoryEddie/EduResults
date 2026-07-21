@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
     if (!session) return NextResponse.json({ error: "Unauthorised." }, { status: 401 });
 
     const ip = getIP(req);
-    if (!checkRateLimit(`get-children:${ip}`, 30, 60 * 60 * 1000)) {
+    if (!await checkRateLimit(`get-children:${ip}`, 30, 60 * 60 * 1000)) {
       const { error, status } = rateLimitResponse();
       return NextResponse.json({ error }, { status });
     }
@@ -20,32 +20,38 @@ export async function POST(req: NextRequest) {
     if (!parentDoc.exists) return NextResponse.json({ error: "Parent profile not found." }, { status: 404 });
     const email = parentDoc.data()!.email;
 
-    const teachersSnap = await adminDb.collection("teachers").get();
     const children: { id: string; name: string; className: string; teacherName: string }[] = [];
+    const studentsSnap = await adminDb.collectionGroup("students")
+      .where("parentEmail", "==", email.toLowerCase())
+      .get();
+    
+    const teacherCache = new Map<string, FirebaseFirestore.DocumentData>();
 
-    for (const teacherDoc of teachersSnap.docs) {
-      const teacherData = teacherDoc.data();
-      const studentsSnap = await adminDb
-        .collection("teachers")
-        .doc(teacherDoc.id)
-        .collection("students")
-        .where("parentEmail", "==", email.toLowerCase())
-        .get();
+    for (const studentDoc of studentsSnap.docs) {
+      const studentData = studentDoc.data();
+      const teacherRef = studentDoc.ref.parent.parent;
+      if (!teacherRef) continue;
 
-      for (const studentDoc of studentsSnap.docs) {
-        const studentData = studentDoc.data();
-        const studentName = studentData.name 
-          ? studentData.name 
-          : `${studentData.firstName || ""} ${studentData.lastName || ""}`.trim() 
-          || "Unknown Student";
-        
-        children.push({
-          id: studentDoc.id,
-          name: studentName,
-          className: teacherData.className || "",
-          teacherName: teacherData.name || "",
-        });
+      let teacherData = teacherCache.get(teacherRef.id);
+      if (!teacherData) {
+        const tSnap = await teacherRef.get();
+        if (tSnap.exists) {
+          teacherData = tSnap.data()!;
+          teacherCache.set(teacherRef.id, teacherData);
+        }
       }
+
+      const studentName = studentData.name 
+        ? studentData.name 
+        : `${studentData.firstName || ""} ${studentData.lastName || ""}`.trim() 
+        || "Unknown Student";
+      
+      children.push({
+        id: studentDoc.id,
+        name: studentName,
+        className: teacherData?.className || "",
+        teacherName: teacherData?.name || "",
+      });
     }
 
     return NextResponse.json({ children });
