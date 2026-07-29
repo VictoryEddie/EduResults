@@ -68,9 +68,15 @@ export function rateLimitResponse() {
 }
 
 export function getIP(req: NextRequest): string {
+  const vercelIp = req.headers.get("x-vercel-forwarded-for");
+  if (vercelIp) return vercelIp.split(",")[0].trim();
+
+  const cfIp = req.headers.get("cf-connecting-ip");
+  if (cfIp) return cfIp;
+
   const realIp = req.headers.get("x-real-ip");
   if (realIp) return realIp;
-  const forwardedFor = req.headers.get("x-forwarded-for");
-  if (forwardedFor) return forwardedFor.split(",")[0].trim();
-  return "unknown";
+
+  return (req as any).ip || "127.0.0.1";
 }
+

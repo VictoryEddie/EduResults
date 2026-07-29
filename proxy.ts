@@ -1,24 +1,21 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-import { cookies } from "next/headers";
-
 /**
- * LIGHTWEIGHT PROXY (Edge-Safe)
- * ---------------------------------
- * This runs on the Edge Runtime. We only do simple existence checks for cookies here
- * to prevent crashes. Full cryptographic/database verification is done in the 
- * Server Component Layouts where we have access to the full Node.js runtime.
+ * LIGHTWEIGHT EDGE PROXY (Next.js 16 Compatible)
+ * -----------------------------------------------
+ * Runs on Next.js Edge Runtime. Does lightweight cookie presence checks
+ * and security header injection. Full database session verification
+ * is performed securely in Server Component Layouts and API Routes.
  */
-export async function proxy(req: NextRequest) {
+export function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  const cookieStore = await cookies();
 
-  const hasAdmin = cookieStore.has("admin-token");
-  const hasTeacher = cookieStore.has("teacher-token");
-  const hasParent = cookieStore.has("parent-token");
+  const hasAdmin = req.cookies.has("admin-token");
+  const hasTeacher = req.cookies.has("teacher-token");
+  const hasParent = req.cookies.has("parent-token");
 
-  /* Portal Root Redirects — Prevent 404s on directory roots */
+  /* Portal Root Redirects — Prevent 404s on bare portal roots */
   if (pathname === "/admin") return NextResponse.redirect(new URL("/admin/dashboard", req.url));
   if (pathname === "/teacher") return NextResponse.redirect(new URL("/teacher/dashboard", req.url));
   if (pathname === "/parent") return NextResponse.redirect(new URL("/parent/dashboard", req.url));
@@ -29,19 +26,38 @@ export async function proxy(req: NextRequest) {
   }
 
   /* Teacher Protection Gatekeeper */
-  if (pathname.startsWith("/teacher") && 
-      !pathname.startsWith("/teacher/login") && 
-      !pathname.startsWith("/teacher/register") && 
-      !pathname.startsWith("/teacher/forgot-password")) {
+  if (
+    pathname.startsWith("/teacher") &&
+    !pathname.startsWith("/teacher/login") &&
+    !pathname.startsWith("/teacher/register") &&
+    !pathname.startsWith("/teacher/forgot-password")
+  ) {
     if (!hasTeacher) return NextResponse.redirect(new URL("/teacher/login", req.url));
   }
 
   /* Parent Protection Gatekeeper */
-  if (pathname.startsWith("/parent") && !pathname.startsWith("/parent/login") && !pathname.startsWith("/parent/register")) {
+  if (
+    pathname.startsWith("/parent") &&
+    !pathname.startsWith("/parent/login") &&
+    !pathname.startsWith("/parent/register") &&
+    !pathname.startsWith("/parent/forgot-password")
+  ) {
     if (!hasParent) return NextResponse.redirect(new URL("/parent/login", req.url));
   }
 
-  return NextResponse.next();
+  /* Cache-Control Headers to prevent browser caching of protected pages */
+  const response = NextResponse.next();
+  if (
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/teacher") ||
+    pathname.startsWith("/parent")
+  ) {
+    response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    response.headers.set("Pragma", "no-cache");
+    response.headers.set("Expires", "0");
+  }
+
+  return response;
 }
 
 export const config = {

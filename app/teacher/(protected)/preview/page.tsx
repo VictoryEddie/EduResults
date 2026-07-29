@@ -17,12 +17,7 @@ import {
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/context/AuthContext";
 import { getFirestoreError } from "@/lib/firestoreErrors";
-import {
-  exportResult,
-  exportClassResults,
-  ExportFormat,
-  ExportData,
-} from "@/lib/exportResults";
+import type { ExportFormat, ExportData } from "@/lib/exportResults";
 import { ACADEMIC_YEARS } from "@/lib/academicYears";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useSchoolSettings } from "@/hooks/useSchoolSettings";
@@ -203,7 +198,7 @@ export default function PreviewPage() {
   ) => {
     const updated = [...draftScores];
     let parsed = parseFloat(value) || 0;
-    
+
     // Enforce constraints
     if (parsed < 0) parsed = 0;
     if (field === "ca" && parsed > 40) parsed = 40;
@@ -224,6 +219,7 @@ export default function PreviewPage() {
   const handleExport = async (format: ExportFormat) => {
     if (!student || !scores.length) return;
     setExporting(true);
+    const { exportResult } = await import("@/lib/exportResults");
     await exportResult(
       {
         studentName: studentFullName,
@@ -294,6 +290,7 @@ export default function PreviewPage() {
       if (dataList.length === 0) {
         setError("No results found for any student in this term.");
       } else {
+        const { exportClassResults } = await import("@/lib/exportResults");
         await exportClassResults(dataList, format);
       }
     } catch (err: unknown) {
@@ -458,10 +455,10 @@ export default function PreviewPage() {
           {/* Result Card */}
           <AnimatePresence mode="wait">
             {!loading &&
-            student &&
-            selectedTerm &&
-            selectedYear &&
-            scores.length > 0 ? (
+              student &&
+              selectedTerm &&
+              selectedYear &&
+              scores.length > 0 ? (
               <motion.div
                 initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -591,13 +588,12 @@ export default function PreviewPage() {
                             </td>
                             <td className="px-8 py-5 text-center">
                               <span
-                                className={`inline-flex items-center justify-center w-10 h-10 rounded-xl font-black text-sm ${
-                                  grade === "A"
+                                className={`inline-flex items-center justify-center w-10 h-10 rounded-xl font-black text-sm ${grade === "A"
                                     ? "bg-emerald-50 text-emerald-600"
                                     : grade === "F"
                                       ? "bg-rose-50 text-rose-500"
                                       : "bg-amber-50 text-amber-600"
-                                }`}
+                                  }`}
                               >
                                 {grade}
                               </span>
@@ -664,10 +660,10 @@ export default function PreviewPage() {
                   </h3>
                   <p className="text-slate-500 font-medium max-w-xs mx-auto">
                     {student &&
-                    selectedTerm &&
-                    selectedYear &&
-                    scores.length === 0
-                       ? `No results found for ${studentFullName} in this term.`
+                      selectedTerm &&
+                      selectedYear &&
+                      scores.length === 0
+                      ? `No results found for ${studentFullName} in this term.`
                       : "Pick a student and academic term to preview results."}
                   </p>
                 </motion.div>

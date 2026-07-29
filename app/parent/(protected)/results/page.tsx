@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { doc, getDoc, collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { getFirestoreError } from "@/lib/firestoreErrors";
-import { exportResult, ExportFormat } from "@/lib/exportResults";
+import type { ExportFormat } from "@/lib/exportResults";
 import { ACADEMIC_YEARS } from "@/lib/academicYears";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useSchoolSettings } from "@/hooks/useSchoolSettings";
@@ -206,6 +206,7 @@ function ResultsContent() {
   const handleExport = async (format: ExportFormat) => {
     if (!result) return;
     setExporting(true);
+    const { exportResult } = await import("@/lib/exportResults");
     await exportResult(
       {
         studentName: childName,
