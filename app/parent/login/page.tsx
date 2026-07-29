@@ -10,6 +10,7 @@ import { getAuthError } from "@/lib/authErrors";
 import { getFirestoreError } from "@/lib/firestoreErrors";
 import ErrorMessage from "@/components/ErrorMessage";
 import AnimatedButton from "@/components/AnimatedButton";
+import Modal from "@/components/Modal";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useSchoolSettings } from "@/hooks/useSchoolSettings";
 
@@ -43,6 +44,7 @@ export default function ParentLogin() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [demoLoading, setDemoLoading] = useState<string | null>(null);
+  const [showDemoModal, setShowDemoModal] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -173,19 +175,39 @@ export default function ParentLogin() {
             </p>
           </div>
 
-          {/* Demo login buttons */}
-          <div className="space-y-3 mb-6">
-            {DEMO_PARENTS.map((parent) => (
+          {/* Single Demo login button & Modal */}
+          {process.env.NEXT_PUBLIC_ENABLE_DEMO_LOGIN === "true" && (
+            <>
               <AnimatedButton
-                key={parent.email}
-                onClick={() => handleDemoLogin(parent)}
-                loading={demoLoading === parent.email}
-                className="w-full bg-gradient-to-r from-[#1B2B4B] to-[#2d3f66] text-white"
+                onClick={() => setShowDemoModal(true)}
+                className="w-full mb-6 bg-gradient-to-r from-[#1B2B4B] to-[#2d3f66] text-white"
               >
-                👨‍👩‍👧 Demo: {parent.name} ({parent.childCount})
+                🚀 Quick Demo Login
               </AnimatedButton>
-            ))}
-          </div>
+
+              <Modal
+                open={showDemoModal}
+                onClose={() => setShowDemoModal(false)}
+                title="Select Demo Parent Account"
+              >
+                <div className="space-y-3 pt-2">
+                  {DEMO_PARENTS.map((parent) => (
+                    <AnimatedButton
+                      key={parent.email}
+                      onClick={() => {
+                        setShowDemoModal(false);
+                        handleDemoLogin(parent);
+                      }}
+                      loading={demoLoading === parent.email}
+                      className="w-full bg-gradient-to-r from-[#1B2B4B] to-[#2d3f66] text-white"
+                    >
+                      👨‍👩‍👧 Demo: {parent.name}
+                    </AnimatedButton>
+                  ))}
+                </div>
+              </Modal>
+            </>
+          )}
 
           <div className="relative mb-6">
             <div className="absolute inset-0 flex items-center">

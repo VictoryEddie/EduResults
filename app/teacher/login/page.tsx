@@ -10,6 +10,7 @@ import { getAuthError } from "@/lib/authErrors";
 import { getFirestoreError } from "@/lib/firestoreErrors";
 import ErrorMessage from "@/components/ErrorMessage";
 import AnimatedButton from "@/components/AnimatedButton";
+import Modal from "@/components/Modal";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useSchoolSettings } from "@/hooks/useSchoolSettings";
 
@@ -40,6 +41,7 @@ export default function TeacherLogin() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [demoLoading, setDemoLoading] = useState<string | null>(null);
+  const [showDemoModal, setShowDemoModal] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -187,20 +189,38 @@ export default function TeacherLogin() {
             </p>
           </div>
 
-          {/* Demo login buttons */}
+          {/* Single Demo login button & Modal */}
           {process.env.NEXT_PUBLIC_ENABLE_DEMO_LOGIN === "true" && (
-            <div className="space-y-3 mb-6">
-              {DEMO_TEACHERS.map((teacher) => (
-                <AnimatedButton
-                  key={teacher.email}
-                  onClick={() => handleDemoLogin(teacher)}
-                  loading={demoLoading === teacher.email}
-                  className="w-full bg-gradient-to-r from-[#1B2B4B] to-[#2d3f66] text-white"
-                >
-                  👨‍🏫 Demo: {teacher.name} ({teacher.className})
-                </AnimatedButton>
-              ))}
-            </div>
+            <>
+              <AnimatedButton
+                onClick={() => setShowDemoModal(true)}
+                className="w-full mb-6 bg-gradient-to-r from-[#1B2B4B] to-[#2d3f66] text-white"
+              >
+                🚀 Quick Demo Login
+              </AnimatedButton>
+
+              <Modal
+                open={showDemoModal}
+                onClose={() => setShowDemoModal(false)}
+                title="Select Demo Teacher Account"
+              >
+                <div className="space-y-3 pt-2">
+                  {DEMO_TEACHERS.map((teacher) => (
+                    <AnimatedButton
+                      key={teacher.email}
+                      onClick={() => {
+                        setShowDemoModal(false);
+                        handleDemoLogin(teacher);
+                      }}
+                      loading={demoLoading === teacher.email}
+                      className="w-full bg-gradient-to-r from-[#1B2B4B] to-[#2d3f66] text-white"
+                    >
+                      👨‍🏫 Demo: {teacher.name} ({teacher.className})
+                    </AnimatedButton>
+                  ))}
+                </div>
+              </Modal>
+            </>
           )}
 
           <div className="relative mb-6">
