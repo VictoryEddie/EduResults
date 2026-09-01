@@ -6,6 +6,8 @@ import Modal from "@/components/Modal";
 import PageTransition from "@/components/PageTransition";
 import { useToast } from "@/components/Toast";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import DemoLockModal from "@/components/DemoLockModal";
+import { useDemoLock } from "@/hooks/useDemoLock";
 import { SkeletonTable } from "@/components/Skeleton";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence, easeOut } from "framer-motion";
@@ -65,9 +67,10 @@ function getGrade(total: number) {
 }
 
 export default function ResultsPage() {
+  usePageTitle("Enter Results");
   const { user } = useAuth();
   const { showToast } = useToast();
-  usePageTitle("Enter Results");
+  const { isDemoUser, lockedActionTitle, guardDemoAction, closeDemoLock } = useDemoLock();
   const [students, setStudents] = useState<Student[]>([]);
   const [selectedTerm, setSelectedTerm] = useState("");
   const [selectedYear, setSelectedYear] = useState("");
@@ -238,9 +241,9 @@ export default function ResultsPage() {
   };
 
   const handleSave = async () => {
-    setError(null);
     if (!user || !selectedStudent || !termKey) return;
-
+    if (guardDemoAction("Save Assessment Scores")) return;
+    setError(null);
     for (const row of scores) {
       if (row.ca === "" || row.exam === "") {
         setError(`Please enter both CA and Exam scores for ${row.subject}.`);
@@ -317,6 +320,7 @@ export default function ResultsPage() {
 
   const handlePublish = async () => {
     if (!user || !termKey) return;
+    if (guardDemoAction("Publish Class Results")) return;
     setPublishing(true);
     try {
       const studentIds = students.filter((s) => s.hasResult).map((s) => s.id);
@@ -829,6 +833,12 @@ export default function ResultsPage() {
             </div>
           </div>
         </Modal>
+
+        <DemoLockModal
+          open={Boolean(lockedActionTitle)}
+          onClose={closeDemoLock}
+          actionTitle={lockedActionTitle ?? undefined}
+        />
       </div>
     </PageTransition>
   );

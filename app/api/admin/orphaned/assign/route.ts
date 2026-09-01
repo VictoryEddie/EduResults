@@ -3,8 +3,16 @@ import { adminDb } from "@/lib/firebaseAdmin";
 import { verifyAdminSession } from "@/lib/verifyAdminSession";
 
 export async function POST(req: NextRequest) {
-  if (!(await verifyAdminSession(req))) {
+  const session = await verifyAdminSession(req);
+  if (!session) {
     return NextResponse.json({ error: "Unauthorised." }, { status: 401 });
+  }
+
+  if (session.isDemo) {
+    return NextResponse.json(
+      { error: "Demo accounts cannot reassign orphaned students." },
+      { status: 403 }
+    );
   }
   try {
     const { studentId, teacherId } = await req.json();

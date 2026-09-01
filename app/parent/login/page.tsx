@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signInWithEmailAndPassword, signOut, getIdToken } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { motion } from "framer-motion";
@@ -14,24 +14,21 @@ import Modal from "@/components/Modal";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useSchoolSettings } from "@/hooks/useSchoolSettings";
 
-// Demo parents data
-const DEMO_PARENTS = [
+// Demo parents base data
+const DEMO_PARENTS_BASE = [
   {
     name: "Babatunde Adebayo",
     email: "babatunde.adebayo@demo.com",
-    childCount: "1 child",
     password: "demo1234",
   },
   {
     name: "Oluwaseun Balogun",
     email: "oluwaseun.balogun@demo.com",
-    childCount: "2 children",
     password: "demo1234",
   },
   {
     name: "Mubarak Omoregie",
     email: "mubarak.omoregie@demo.com",
-    childCount: "5 children",
     password: "demo1234",
   },
 ];
@@ -45,13 +42,23 @@ export default function ParentLogin() {
   const [loading, setLoading] = useState(false);
   const [demoLoading, setDemoLoading] = useState<string | null>(null);
   const [showDemoModal, setShowDemoModal] = useState(false);
+  const [counts, setCounts] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    fetch("/api/demo-parent-counts")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.counts) setCounts(data.counts);
+      })
+      .catch(() => {});
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
     setError(null);
   };
 
-  const handleDemoLogin = async (parent: typeof DEMO_PARENTS[0]) => {
+  const handleDemoLogin = async (parent: typeof DEMO_PARENTS_BASE[0]) => {
     setDemoLoading(parent.email);
     setError(null);
     try {
@@ -191,19 +198,26 @@ export default function ParentLogin() {
                 title="Select Demo Parent Account"
               >
                 <div className="space-y-3 pt-2">
-                  {DEMO_PARENTS.map((parent) => (
-                    <AnimatedButton
-                      key={parent.email}
-                      onClick={() => {
-                        setShowDemoModal(false);
-                        handleDemoLogin(parent);
-                      }}
-                      loading={demoLoading === parent.email}
-                      className="w-full bg-gradient-to-r from-[#1B2B4B] to-[#2d3f66] text-white"
-                    >
-                      👨‍👩‍👧 Demo: {parent.name}
-                    </AnimatedButton>
-                  ))}
+                  {DEMO_PARENTS_BASE.map((parent) => {
+                    const cnt = counts[parent.email] ?? 0;
+                    const countLabel = cnt === 1 ? "1 child" : `${cnt} children`;
+                    return (
+                      <AnimatedButton
+                        key={parent.email}
+                        onClick={() => {
+                          setShowDemoModal(false);
+                          handleDemoLogin(parent);
+                        }}
+                        loading={demoLoading === parent.email}
+                        className="w-full bg-gradient-to-r from-[#1B2B4B] to-[#2d3f66] text-white flex justify-between items-center px-4"
+                      >
+                        <span>👨‍👩‍👧 Demo: {parent.name}</span>
+                        <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full font-normal ml-2">
+                          {countLabel}
+                        </span>
+                      </AnimatedButton>
+                    );
+                  })}
                 </div>
               </Modal>
             </>

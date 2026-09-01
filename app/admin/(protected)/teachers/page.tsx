@@ -9,6 +9,8 @@ import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import DemoLockModal from "@/components/DemoLockModal";
+import { useDemoLock } from "@/hooks/useDemoLock";
 import {
   GraduationCap,
   Search,
@@ -30,6 +32,7 @@ interface Teacher {
 export default function AdminTeachersPage() {
   usePageTitle("Manage Teachers");
   const { showToast } = useToast();
+  const { isDemoUser, lockedActionTitle, guardDemoAction, closeDemoLock } = useDemoLock();
   const { data: teachers = [], isLoading: loading, isError, refetch: fetchTeachers } = useQuery<Teacher[]>({
     queryKey: ['admin-teachers'],
     queryFn: async () => {
@@ -56,6 +59,10 @@ export default function AdminTeachersPage() {
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
+    if (guardDemoAction("Delete Teacher Account")) {
+      setDeleteTarget(null);
+      return;
+    }
     setSaving(true);
     const res = await fetch("/api/admin/teachers", {
       method: "DELETE",
@@ -73,6 +80,10 @@ export default function AdminTeachersPage() {
   };
 
   const handleAddTeacher = async () => {
+    if (guardDemoAction("Add Teacher Account")) {
+      setAddModalOpen(false);
+      return;
+    }
     if (
       !newTeacher.firstName ||
       !newTeacher.lastName ||
@@ -114,6 +125,10 @@ export default function AdminTeachersPage() {
   const handleUpdateClass = async () => {
     if (!classTarget || !newClass.trim()) {
       showToast("Class name cannot be empty.", "error");
+      return;
+    }
+    if (guardDemoAction("Assign Teacher Class")) {
+      setClassTarget(null);
       return;
     }
     setSaving(true);
@@ -490,6 +505,12 @@ export default function AdminTeachersPage() {
           </div>
         </div>
       </Modal>
+
+      <DemoLockModal
+        open={Boolean(lockedActionTitle)}
+        onClose={closeDemoLock}
+        actionTitle={lockedActionTitle ?? undefined}
+      />
     </div>
   );
 }

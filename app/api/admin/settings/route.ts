@@ -29,8 +29,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error }, { status });
   }
 
-  if (!(await verifyAdminSession(req))) {
+  const session = await verifyAdminSession(req);
+  if (!session) {
     return NextResponse.json({ error: "Unauthorised." }, { status: 401 });
+  }
+
+  if (session.isDemo) {
+    return NextResponse.json(
+      { error: "Demo accounts cannot update school settings." },
+      { status: 403 }
+    );
   }
 
   try {

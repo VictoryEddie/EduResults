@@ -41,9 +41,11 @@ yarn-error.log*
 next-env.d.ts
 
 # project-specific files that don't need to be committed
+.agents/
 AGENTS.md
 CLAUDE.md
 PROJECT_ISSUES_AND_FIXES.md
+REAL_WORLD_LEARNINGS_AND_SKILLS.md
 backups/
 check_email.ts
 middleware.ts.debug

@@ -20,6 +20,8 @@ import { useAuth } from "@/context/AuthContext";
 import { getFirestoreError } from "@/lib/firestoreErrors";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import DemoLockModal from "@/components/DemoLockModal";
+import { useDemoLock } from "@/hooks/useDemoLock";
 import {
   Users,
   UserPlus,
@@ -42,6 +44,8 @@ interface Student {
 export default function StudentsPage() {
   usePageTitle("Manage Students");
   const { user } = useAuth();
+  const { isDemoUser, lockedActionTitle, guardDemoAction, closeDemoLock } = useDemoLock();
+
   const [students, setStudents] = useState<Student[]>([]);
   const [form, setForm] = useState({ name: "", parentEmail: "" });
   const [showForm, setShowForm] = useState(false);
@@ -80,6 +84,10 @@ export default function StudentsPage() {
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (guardDemoAction("Add Student to Class")) {
+      setShowForm(false);
+      return;
+    }
     setError(null);
     if (!user) return;
 
@@ -121,6 +129,10 @@ export default function StudentsPage() {
 
   const handleSaveEdit = async () => {
     if (!user || !editTarget) return;
+    if (guardDemoAction("Edit Student Details")) {
+      setEditTarget(null);
+      return;
+    }
     if (!editName.trim()) {
       setEditError("Student name cannot be empty.");
       return;
@@ -199,6 +211,10 @@ export default function StudentsPage() {
 
   const handleRemove = async () => {
     if (!user || !deleteTarget) return;
+    if (guardDemoAction("Delete Student from Class")) {
+      setDeleteTarget(null);
+      return;
+    }
     setSavingDelete(true);
     try {
       const studentDoc = students.find((s) => s.id === deleteTarget.id);
@@ -560,6 +576,12 @@ export default function StudentsPage() {
           </div>
         </div>
       </Modal>
+
+      <DemoLockModal
+        open={Boolean(lockedActionTitle)}
+        onClose={closeDemoLock}
+        actionTitle={lockedActionTitle ?? undefined}
+      />
     </PageTransition>
   );
 }

@@ -9,6 +9,8 @@ import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import DemoLockModal from "@/components/DemoLockModal";
+import { useDemoLock } from "@/hooks/useDemoLock";
 import {
   Users,
   Search,
@@ -29,6 +31,8 @@ interface Parent {
 export default function AdminParentsPage() {
   usePageTitle("Manage Parents");
   const { showToast } = useToast();
+  const { isDemoUser, lockedActionTitle, guardDemoAction, closeDemoLock } = useDemoLock();
+  
   const { data: parents = [], isLoading: loading, isError, refetch: fetchParents } = useQuery<Parent[]>({
     queryKey: ['admin-parents'],
     queryFn: async () => {
@@ -52,6 +56,10 @@ export default function AdminParentsPage() {
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
+    if (guardDemoAction("Delete Parent Account")) {
+      setDeleteTarget(null);
+      return;
+    }
     setSaving(true);
     const res = await fetch("/api/admin/parents", {
       method: "DELETE",
@@ -69,6 +77,10 @@ export default function AdminParentsPage() {
   };
 
   const handleAddParent = async () => {
+    if (guardDemoAction("Add Parent Account")) {
+      setAddModalOpen(false);
+      return;
+    }
     if (
       !newParent.firstName ||
       !newParent.lastName ||
@@ -371,6 +383,12 @@ export default function AdminParentsPage() {
           </div>
         </div>
       </Modal>
+
+      <DemoLockModal
+        open={Boolean(lockedActionTitle)}
+        onClose={closeDemoLock}
+        actionTitle={lockedActionTitle ?? undefined}
+      />
     </div>
   );
 }

@@ -46,8 +46,16 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  if (!(await isAdmin(req)))
+  const session = await verifyAdminSession(req);
+  if (!session)
     return NextResponse.json({ error: "Unauthorised." }, { status: 401 });
+
+  if (session.isDemo) {
+    return NextResponse.json(
+      { error: "Demo accounts cannot create parent records." },
+      { status: 403 }
+    );
+  }
 
   try {
     const { firstName, lastName, email, password } = await req.json();
@@ -118,8 +126,16 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  if (!(await isAdmin(req)))
+  const session = await verifyAdminSession(req);
+  if (!session)
     return NextResponse.json({ error: "Unauthorised." }, { status: 401 });
+
+  if (session.isDemo) {
+    return NextResponse.json(
+      { error: "Demo accounts cannot delete parent records." },
+      { status: 403 }
+    );
+  }
 
   try {
     const { parentId } = await req.json();

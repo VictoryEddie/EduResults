@@ -13,6 +13,7 @@ import type { ExportFormat } from "@/lib/exportResults";
 import { ACADEMIC_YEARS } from "@/lib/academicYears";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useSchoolSettings } from "@/hooks/useSchoolSettings";
+import { useAuth } from "@/context/AuthContext";
 import {
   Trophy,
   TrendingUp,
@@ -101,6 +102,7 @@ function getOverallGrade(avg: number) {
 function ResultsContent() {
   usePageTitle("View Results");
   const { settings } = useSchoolSettings();
+  const { user, loading: authLoading } = useAuth();
   const params = useSearchParams();
   const studentId = params.get("studentId") || "";
   const childName = params.get("name") || "Student";
@@ -153,11 +155,15 @@ function ResultsContent() {
     let totalStudents = 0;
 
     if (data.teacherId) {
-      const teacherDoc = await fetchWithRetry(
-        doc(db, "teachers", data.teacherId),
-      );
-      if (teacherDoc && teacherDoc.exists())
-        teacherName = (teacherDoc.data() as any).name;
+      try {
+        const teacherDoc = await fetchWithRetry(
+          doc(db, "teachers", data.teacherId),
+        );
+        if (teacherDoc && teacherDoc.exists())
+          teacherName = (teacherDoc.data() as any).name;
+      } catch (teacherErr) {
+        console.warn("Could not fetch teacher details:", teacherErr);
+      }
 
       // Use pre-calculated position if available
       if (data.position) {
@@ -181,6 +187,10 @@ function ResultsContent() {
 
   useEffect(() => {
     if (!selectedTerm || !selectedYear || !studentId) return;
+    // Wait for Firebase Auth to finish initializing before touching Firestore.
+    // If we call getDoc while auth.currentUser is still null, the security rules
+    // evaluate request.auth == null and throw permission-denied.
+    if (authLoading || !user) return;
     setLoading(true);
     setError(null);
     setResult(null);
@@ -193,7 +203,7 @@ function ResultsContent() {
         setError(getFirestoreError((err as { code?: string }).code ?? "")),
       )
       .finally(() => setLoading(false));
-  }, [selectedTerm, selectedYear, studentId]);
+  }, [selectedTerm, selectedYear, studentId, authLoading, user]);
 
   const handleCompare = async () => {
     if (!compareYear || !compareTerm) return;

@@ -35,8 +35,16 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  if (!(await isAdmin(req)))
+  const session = await verifyAdminSession(req);
+  if (!session)
     return NextResponse.json({ error: "Unauthorised." }, { status: 401 });
+
+  if (session.isDemo) {
+    return NextResponse.json(
+      { error: "Demo accounts cannot create teacher records." },
+      { status: 403 }
+    );
+  }
 
   try {
     const { firstName, lastName, email, className, password } =
@@ -124,8 +132,16 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  if (!(await isAdmin(req)))
+  const session = await verifyAdminSession(req);
+  if (!session)
     return NextResponse.json({ error: "Unauthorised." }, { status: 401 });
+
+  if (session.isDemo) {
+    return NextResponse.json(
+      { error: "Demo accounts cannot delete teacher records." },
+      { status: 403 }
+    );
+  }
 
   try {
     const { teacherId } = await req.json();

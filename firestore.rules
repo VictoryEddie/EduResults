@@ -27,7 +27,7 @@ service cloud.firestore {
 
     // Teachers — profile and student management
     match /teachers/{teacherId} {
-      allow get: if isSignedIn() && request.auth.uid == teacherId;
+      allow get: if isSignedIn();
       allow list: if false; 
       allow create, update: if isSignedIn() && request.auth.uid == teacherId;
       allow delete: if false;

@@ -7,6 +7,8 @@ import ErrorMessage from "@/components/ErrorMessage";
 import AnimatedButton from "@/components/AnimatedButton";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import DemoLockModal from "@/components/DemoLockModal";
+import { useDemoLock } from "@/hooks/useDemoLock";
 import {
   Settings,
   School,
@@ -20,6 +22,8 @@ import {
 
 export default function AdminSettings() {
   usePageTitle("School Settings");
+  const { isDemoUser, lockedActionTitle, guardDemoAction, closeDemoLock } = useDemoLock();
+
   const [form, setForm] = useState({
     schoolName: "",
     location: "",
@@ -46,6 +50,9 @@ export default function AdminSettings() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (guardDemoAction("Update School Settings")) {
+      return;
+    }
     setSaving(true);
     setError(null);
     setSuccess(false);
@@ -205,6 +212,12 @@ export default function AdminSettings() {
           </button>
         </form>
       </main>
+
+      <DemoLockModal
+        open={Boolean(lockedActionTitle)}
+        onClose={closeDemoLock}
+        actionTitle={lockedActionTitle ?? undefined}
+      />
     </div>
   );
 }
